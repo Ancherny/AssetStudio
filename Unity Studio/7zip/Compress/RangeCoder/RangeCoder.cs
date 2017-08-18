@@ -8,7 +8,7 @@ namespace SevenZip.Compression.RangeCoder
 
 		System.IO.Stream Stream;
 
-		public UInt64 Low;
+		public ulong Low;
 		public uint Range;
 		uint _cacheSize;
 		byte _cache;

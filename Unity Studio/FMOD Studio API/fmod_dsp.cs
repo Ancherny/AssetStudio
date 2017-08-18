@@ -591,7 +591,7 @@ namespace FMOD
         {
             get
             {
-                var buffer = new float[numchannels][];
+                float[][] buffer = new float[numchannels][];
                 
                 for (int i = 0; i < numchannels; ++i)
                 {

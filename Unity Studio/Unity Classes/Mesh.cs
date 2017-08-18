@@ -213,13 +213,13 @@ namespace Unity_Studio
 
                 for (int v = 0; v < 8; v++)
                 {
-                    BitArray valueBits = new BitArray(new Boolean[pakData.m_BitSize]);
+                    BitArray valueBits = new BitArray(new bool[pakData.m_BitSize]);
                     for (int b = 0; b < pakData.m_BitSize; b++)
                     {
                         valueBits.Set(b, groupBits.Get(b + v * pakData.m_BitSize));
                     }
 
-                    var valueArr = new int[1];
+                    int[] valueArr = new int[1];
                     valueBits.CopyTo(valueArr, 0);
                     //unpackedVectors[v + g * 8] = (float)(valueArr[0] / bitmax) * pakData.m_Range + pakData.m_Start;
                     //valueBits.CopyTo(unpackedVectors, v + g * 8);//doesn't work with uint[]
@@ -238,13 +238,13 @@ namespace Unity_Studio
 
                 for (int v = 0; v < endVal; v++)
                 {
-                    BitArray valueBits = new BitArray(new Boolean[pakData.m_BitSize]);
+                    BitArray valueBits = new BitArray(new bool[pakData.m_BitSize]);
                     for (int b = 0; b < pakData.m_BitSize; b++)
                     {
                         valueBits.Set(b, groupBits.Get(b + v * pakData.m_BitSize));
                     }
 
-                    var valueArr = new int[1];
+                    int[] valueArr = new int[1];
                     valueBits.CopyTo(valueArr, 0);
                     //unpackedVectors[v + groupCount * 8] = (float)(valueArr[0] / bitmax) * pakData.m_Range + pakData.m_Start;
                     //valueBits.CopyTo(unpackedVectors, v + groupCount * 8);
@@ -330,7 +330,7 @@ namespace Unity_Studio
         {
             //Stream = new EndianStream(File.OpenRead(sourceFile.filePath), sourceFile.endianType);
             //Stream.endian = sourceFile.endianType;
-            var version = MeshPD.sourceFile.version;
+            int[] version = MeshPD.sourceFile.version;
             a_Stream = MeshPD.sourceFile.a_Stream;
             a_Stream.Position = MeshPD.Offset;
 
@@ -655,7 +655,7 @@ namespace Unity_Studio
                         m_Streams[s].offset = 0;
                         m_Streams[s].stride = 0;
 
-                        foreach (var m_Channel in m_Channels)
+                        foreach (ChannelInfo m_Channel in m_Channels)
                         {
                             if (m_Channel.stream == s) { m_Streams[s].stride += m_Channel.dimension * (4 / (int)Math.Pow(2, m_Channel.format)); }
                         }
@@ -693,11 +693,11 @@ namespace Unity_Studio
                 {
                     //it is better to loop channels instead of streams
                     //because channels are likely to be sorted by vertex property
-                    foreach (var m_Channel in m_Channels)
+                    foreach (ChannelInfo m_Channel in m_Channels)
                     {
                         if (m_Channel.dimension > 0)
                         {
-                            var m_Stream = m_Streams[m_Channel.stream];
+                            StreamInfo m_Stream = m_Streams[m_Channel.stream];
 
                             for (int b = 0; b < 8; b++)
                             {
@@ -766,7 +766,7 @@ namespace Unity_Studio
                 #region 3.5.0 - 3.5.7
                 else if (m_Streams != null)
                 {
-                    foreach (var m_Stream in m_Streams)
+                    foreach (StreamInfo m_Stream in m_Streams)
                     {
                         //a stream may have multiple vertex components but without channels there are no offsets, so I assume all vertex properties are in order
                         //Unity 3.5.x only uses floats, and that's probably why channels were introduced in Unity 4

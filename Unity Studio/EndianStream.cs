@@ -55,7 +55,7 @@ namespace Unity_Studio
             return base.ReadChar();
         }
  
-        public override Int16 ReadInt16()
+        public override short ReadInt16()
         {
             if (endian == EndianType.BigEndian)
             {
@@ -77,7 +77,7 @@ namespace Unity_Studio
             else return base.ReadInt32();
         }
  
-        public override Int64 ReadInt64()
+        public override long ReadInt64()
         {
             if (endian == EndianType.BigEndian)
             {
@@ -88,7 +88,7 @@ namespace Unity_Studio
             else return base.ReadInt64();
         }
  
-        public override UInt16 ReadUInt16()
+        public override ushort ReadUInt16()
         {
             if (endian == EndianType.BigEndian)
             {
@@ -99,7 +99,7 @@ namespace Unity_Studio
             else return base.ReadUInt16();
         }
  
-        public override UInt32 ReadUInt32()
+        public override uint ReadUInt32()
         {
             if (endian == EndianType.BigEndian)
             {
@@ -110,7 +110,7 @@ namespace Unity_Studio
             else return base.ReadUInt32();
         }
 
-        public override UInt64 ReadUInt64()
+        public override ulong ReadUInt64()
         {
             if (endian == EndianType.BigEndian)
             {
@@ -121,7 +121,7 @@ namespace Unity_Studio
             else return base.ReadUInt64();
         }
  
-        public override Single ReadSingle()
+        public override float ReadSingle()
         {
             if (endian == EndianType.BigEndian)
             {
@@ -132,7 +132,7 @@ namespace Unity_Studio
             else return base.ReadSingle();
         }
  
-        public override Double ReadDouble()
+        public override double ReadDouble()
         {
             if (endian == EndianType.BigEndian)
             {
@@ -167,7 +167,7 @@ namespace Unity_Studio
             {
                 byte[] stringData = new byte[length];
                 base.Read(stringData, 0, length);
-                var result = System.Text.Encoding.UTF8.GetString(stringData); //must verify strange characters in PS3
+                string result = System.Text.Encoding.UTF8.GetString(stringData); //must verify strange characters in PS3
 
                 /*string result = "";
                 char c;

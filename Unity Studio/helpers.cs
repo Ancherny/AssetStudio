@@ -19,7 +19,7 @@ namespace Unity_Studio
         public static PPtr ReadPPtr(this AssetsFile sourceFile)
         {
             PPtr result = new PPtr();
-            var a_Stream = sourceFile.a_Stream;
+            EndianStream a_Stream = sourceFile.a_Stream;
 
             int FileID = a_Stream.ReadInt32();
             if (FileID >= 0 && FileID < sourceFile.sharedAssetsList.Count)

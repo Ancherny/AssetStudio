@@ -136,7 +136,7 @@ namespace Unity_Studio
                     StringBuilder cb = new StringBuilder();
                     for (int m = 0; m < memberCount; m++) { readBase(cb, 1); }
 
-                    var aClass = new ClassStrStruct() { ID = classID, Text = (baseType + " " + baseName), members = cb.ToString() };
+                    ClassStrStruct aClass = new ClassStrStruct() { ID = classID, Text = (baseType + " " + baseName), members = cb.ToString() };
                     aClass.SubItems.Add(classID.ToString());
                     ClassStructures.Add(classID, aClass);
                 }
@@ -358,7 +358,7 @@ namespace Unity_Studio
                 }
                 a_Stream.Position += stringSize;
 
-                var aClass = new ClassStrStruct() { ID = classID, Text = className, members = classVarStr.ToString() };
+                ClassStrStruct aClass = new ClassStrStruct() { ID = classID, Text = className, members = classVarStr.ToString() };
                 aClass.SubItems.Add(classID.ToString());
                 ClassStructures.Add(classID, aClass);
             }

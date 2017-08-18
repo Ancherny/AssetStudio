@@ -89,7 +89,7 @@ namespace Lz4
 #endif
 			int nRead, nToRead = count;
 
-			var decBuf = decodeBuffer;
+			byte[] decBuf = decodeBuffer;
 
 			//the stringy gotos are obnoxious, but their purpose is to
 			//make it *blindingly* obvious how the state machine transitions
@@ -368,7 +368,7 @@ namespace Lz4
 
 		private int ReadByteCore()
 		{
-			var buf = decodeBuffer;
+			byte[] buf = decodeBuffer;
 
 			if( inBufPos == inBufEnd )
 			{
@@ -391,7 +391,7 @@ namespace Lz4
 
 		private int ReadOffsetCore()
 		{
-			var buf = decodeBuffer;
+			byte[] buf = decodeBuffer;
 
 			if( inBufPos == inBufEnd )
 			{
@@ -442,13 +442,13 @@ namespace Lz4
 		{
 			int nToRead = count;
 
-			var buf = decodeBuffer;
+			byte[] buf = decodeBuffer;
 			int inBufLen = inBufEnd - inBufPos;
 
 			int fromBuf = nToRead < inBufLen ? nToRead : inBufLen;
 			if( fromBuf != 0 )
 			{
-				var bufPos = inBufPos;
+				int bufPos = inBufPos;
 
 				for( int c = fromBuf; c-- != 0; )
 					buffer[offset++] = buf[bufPos++];
@@ -477,7 +477,7 @@ namespace Lz4
 
 					fromBuf = nToRead < nRead ? nToRead : nRead;
 
-					var bufPos = inBufPos;
+					int bufPos = inBufPos;
 
 					for( int c = fromBuf; c-- != 0; )
 						buffer[offset++] = buf[bufPos++];

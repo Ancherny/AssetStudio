@@ -37,9 +37,9 @@ namespace Unity_Studio
                     byte[] lz4buffer = new byte[compressedSize];
                     lz4Stream.Read(lz4buffer, 0, compressedSize);
 
-                    using (var inputStream = new MemoryStream(lz4buffer))
+                    using (MemoryStream inputStream = new MemoryStream(lz4buffer))
                     {
-                        var decoder = new Lz4DecoderStream(inputStream);
+                        Lz4DecoderStream decoder = new Lz4DecoderStream(inputStream);
 
                         filebuffer = new byte[uncompressedSize]; //is this ok?
                         for (;;)
@@ -51,14 +51,14 @@ namespace Unity_Studio
                     }
                 }
 
-                using (var b_Stream = new EndianStream(new MemoryStream(filebuffer), EndianType.BigEndian))
+                using (EndianStream b_Stream = new EndianStream(new MemoryStream(filebuffer), EndianType.BigEndian))
                 {
                     readBundle(b_Stream);
                 }
             }
             else
             {
-                using (var b_Stream = new EndianStream(File.OpenRead(fileName), EndianType.BigEndian))
+                using (EndianStream b_Stream = new EndianStream(File.OpenRead(fileName), EndianType.BigEndian))
                 {
                     readBundle(b_Stream);
                 }
@@ -67,7 +67,7 @@ namespace Unity_Studio
 
         private void readBundle(EndianStream b_Stream)
         {
-            var header = b_Stream.ReadStringToNull();
+            string header = b_Stream.ReadStringToNull();
 
             if (header == "UnityWeb" || header == "UnityRaw" || header == "\xFA\xFA\xFA\xFA\xFA\xFA\xFA\xFA")
             {
@@ -103,7 +103,7 @@ namespace Unity_Studio
                             byte[] lzmaBuffer = new byte[lzmaSize];
                             b_Stream.Read(lzmaBuffer, 0, lzmaSize);
 
-                            using (var lzmaStream = new EndianStream(SevenZip.Compression.LZMA.SevenZipHelper.StreamDecompress(new MemoryStream(lzmaBuffer)), EndianType.BigEndian))
+                            using (EndianStream lzmaStream = new EndianStream(SevenZip.Compression.LZMA.SevenZipHelper.StreamDecompress(new MemoryStream(lzmaBuffer)), EndianType.BigEndian))
                             {
                                 getFiles(lzmaStream, 0);
                             }

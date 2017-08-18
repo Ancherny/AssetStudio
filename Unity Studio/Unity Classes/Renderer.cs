@@ -17,8 +17,8 @@ namespace Unity_Studio
 
         public Renderer(AssetPreloadData preloadData)
         {
-            var sourceFile = preloadData.sourceFile;
-            var a_Stream = preloadData.sourceFile.a_Stream;
+            AssetsFile sourceFile = preloadData.sourceFile;
+            EndianStream a_Stream = preloadData.sourceFile.a_Stream;
             a_Stream.Position = preloadData.Offset;
 
             if (sourceFile.platform == -2)

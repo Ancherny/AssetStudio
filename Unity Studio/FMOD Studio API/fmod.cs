@@ -1679,7 +1679,7 @@ namespace FMOD
 
         #region equality
 
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             return Equals(obj as HandleBase);
         }
@@ -1695,7 +1695,7 @@ namespace FMOD
         public static bool operator ==(HandleBase a, HandleBase b)
         {
             // If both are null, or both are same instance, return true.
-            if (Object.ReferenceEquals(a, b))
+            if (object.ReferenceEquals(a, b))
             {
                 return true;
             }
@@ -1813,11 +1813,11 @@ namespace FMOD
         // Plug-in support.
         public RESULT setPluginPath          (string path)
         {
-            return FMOD_System_SetPluginPath(rawPtr, Encoding.UTF8.GetBytes(path + Char.MinValue));
+            return FMOD_System_SetPluginPath(rawPtr, Encoding.UTF8.GetBytes(path + char.MinValue));
         }
         public RESULT loadPlugin             (string filename, out uint handle, uint priority)
         {
-            return FMOD_System_LoadPlugin(rawPtr, Encoding.UTF8.GetBytes(filename + Char.MinValue), out handle, priority);
+            return FMOD_System_LoadPlugin(rawPtr, Encoding.UTF8.GetBytes(filename + char.MinValue), out handle, priority);
         }
         public RESULT loadPlugin             (string filename, out uint handle)
         {
@@ -1995,7 +1995,7 @@ namespace FMOD
             sound = null;
 
             byte[] stringData;
-            stringData = Encoding.UTF8.GetBytes(name + Char.MinValue);
+            stringData = Encoding.UTF8.GetBytes(name + char.MinValue);
             
             exinfo.cbsize = Marshal.SizeOf(exinfo);
 
@@ -2029,7 +2029,7 @@ namespace FMOD
             sound = null;
 
             byte[] stringData;
-            stringData = Encoding.UTF8.GetBytes(name + Char.MinValue);
+            stringData = Encoding.UTF8.GetBytes(name + char.MinValue);
             
             exinfo.cbsize = Marshal.SizeOf(exinfo);
 
@@ -2082,7 +2082,7 @@ namespace FMOD
         {
             channelgroup = null;
 
-            byte[] stringData = Encoding.UTF8.GetBytes(name + Char.MinValue);
+            byte[] stringData = Encoding.UTF8.GetBytes(name + char.MinValue);
 
             IntPtr channelgroupraw;
             RESULT result = FMOD_System_CreateChannelGroup(rawPtr, stringData, out channelgroupraw);
@@ -2094,7 +2094,7 @@ namespace FMOD
         {
             soundgroup = null;
 
-            byte[] stringData = Encoding.UTF8.GetBytes(name + Char.MinValue);
+            byte[] stringData = Encoding.UTF8.GetBytes(name + char.MinValue);
 
             IntPtr soundgroupraw;
             RESULT result = FMOD_System_CreateSoundGroup(rawPtr, stringData, out soundgroupraw);
@@ -2265,7 +2265,7 @@ namespace FMOD
         // Network functions
         public RESULT setNetworkProxy               (string proxy)
         {
-            return FMOD_System_SetNetworkProxy(rawPtr, Encoding.UTF8.GetBytes(proxy + Char.MinValue));
+            return FMOD_System_SetNetworkProxy(rawPtr, Encoding.UTF8.GetBytes(proxy + char.MinValue));
         }
         public RESULT getNetworkProxy               (StringBuilder proxy, int proxylen)
         {
@@ -4280,7 +4280,7 @@ namespace FMOD
 			int strlen = Array.IndexOf(bytes, (byte)0);
 			if (strlen > 0)
 			{
-				String str = Encoding.UTF8.GetString(bytes, 0, strlen);
+				string str = Encoding.UTF8.GetString(bytes, 0, strlen);
 				builder.Append(str);
 			}
         }
