@@ -166,14 +166,10 @@ namespace UnityStudio
                 a_Stream.Position += 2;
                 if (fileGen >= 15)
                 {
-                    byte unknownByte = a_Stream.ReadByte();
                     //this is a single byte, not an int32
                     //the next entry is aligned after this
                     //but not the last!
-                    if (unknownByte != 0)
-                    {
-                        bool investigate = true;
-                    }
+                    a_Stream.ReadByte();
                 }
 
                 if (UnityClassID.Names[asset.Type2] != null)

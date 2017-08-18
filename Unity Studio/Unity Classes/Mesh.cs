@@ -394,13 +394,9 @@ namespace UnityStudio
                                     (version[1] > 1 && version[1] <= 2)))
             {
                 int m_Shapes_size = a_Stream.ReadInt32();
-                if (m_Shapes_size > 0)
-                {
-                    bool stop = true;
-                }
                 for (int s = 0; s < m_Shapes_size; s++) //untested
                 {
-                    string shape_name = a_Stream.ReadAlignedString(a_Stream.ReadInt32());
+                    a_Stream.ReadAlignedString(a_Stream.ReadInt32()); // string shape_name
                     a_Stream.Position += 36; //uint firstVertex, vertexCount; Vector3f aabbMinDelta, aabbMaxDelta; bool hasNormals, hasTangents
                 }
 
@@ -412,10 +408,6 @@ namespace UnityStudio
             else if (version[0] >= 5 || (version[0] == 4 && version[1] >= 3))
             {
                 int m_ShapeVertices_size = a_Stream.ReadInt32();
-                if (m_ShapeVertices_size > 0)
-                {
-                    bool stop = true;
-                }
                 a_Stream.Position += m_ShapeVertices_size * 40; //vertex positions, normals, tangents & uint index
 
                 int shapes_size = a_Stream.ReadInt32();
@@ -424,7 +416,7 @@ namespace UnityStudio
                 int channels_size = a_Stream.ReadInt32();
                 for (int c = 0; c < channels_size; c++)
                 {
-                    string channel_name = a_Stream.ReadAlignedString(a_Stream.ReadInt32());
+                    a_Stream.ReadAlignedString(a_Stream.ReadInt32()); // string channel_name
                     a_Stream.Position += 12; //uint nameHash; int frameIndex, frameCount
                 }
 
