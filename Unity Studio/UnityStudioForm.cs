@@ -12,7 +12,6 @@ using System.Text.RegularExpressions;
 using System.Drawing.Imaging;
 using Tao.DevIl;
 using System.Web.Script.Serialization;
-using Unity_Studio;
 
 // TODO For extracting bundles, first check if file exists then decompress
 // TODO Double-check channelgroup argument in new FMOD Studio API system.playSound method

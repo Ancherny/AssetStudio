@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using Unity_Studio;
 
 namespace UnityStudio
 {

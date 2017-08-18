@@ -1,5 +1,4 @@
 ﻿using System;
-using Unity_Studio;
 
 namespace UnityStudio
 {

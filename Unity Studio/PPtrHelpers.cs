@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using UnityStudio;
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     public class PPtr
     {

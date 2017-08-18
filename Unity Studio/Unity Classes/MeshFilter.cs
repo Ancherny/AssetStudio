@@ -1,5 +1,4 @@
-﻿using Unity_Studio;
-
+﻿
 namespace UnityStudio
 {
     public class MeshFilter
