@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,10 +10,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
-using Tao.DevIl;
 
 // TODO For extracting bundles, first check if file exists then decompress
-// TODO Double-check channelgroup argument in new FMOD Studio API system.playSound method
 // TODO Font index error in Dreamfall Chapters
 
 namespace UnityStudio
@@ -34,10 +31,14 @@ namespace UnityStudio
         private List<AssetPreloadData> visibleAssets = new List<AssetPreloadData>();
 
         private AssetPreloadData lastSelectedItem;
+
         private AssetPreloadData lastLoadedAsset;
+
         //private AssetsFile mainDataFile;
         private string mainPath = "";
+
         private string productName = "";
+
         private readonly string[] fileTypes =
         {
             "maindata.",
@@ -54,20 +55,11 @@ namespace UnityStudio
         private readonly Dictionary<string, SortedDictionary<int, ClassStrStruct>> AllClassStructures =
             new Dictionary<string, SortedDictionary<int, ClassStrStruct>>();
 
-        private FMOD.System system;
-        private FMOD.Sound sound;
-        private FMOD.Channel channel;
-        private FMOD.SoundGroup masterSoundGroup;
-        //private FMOD.ChannelGroup channelGroup;
-        private FMOD.MODE loopMode = FMOD.MODE.LOOP_OFF;
-        private uint FMODlenms;
-        private float FMODVolume = 0.8f;
-        private float FMODfrequency;
-
         private Bitmap imageTexture;
 
         //asset list sorting helpers
         private int firstSortColumn = -1;
+
         private int secondSortColumn;
         private bool reverseSort;
         private bool enableFiltering;
@@ -79,6 +71,7 @@ namespace UnityStudio
 
         //counters for progress bar
         private int totalAssetCount;
+
         private int totalTreeNodes;
 
         private System.Drawing.Text.PrivateFontCollection pfc = new System.Drawing.Text.PrivateFontCollection();
@@ -242,10 +235,13 @@ namespace UnityStudio
                 totalAssetCount += assetsFile.preloadTable.Count;
 
                 assetsfileList.Add(assetsFile);
+
                 #region for 2.6.x find mainData and get string version
+
                 if (assetsFile.fileGen == 6 && Path.GetFileName(fileName) != "mainData")
                 {
-                    AssetsFile mainDataFile = assetsfileList.Find(aFile => aFile.filePath == Path.GetDirectoryName(fileName) + "\\mainData");
+                    AssetsFile mainDataFile = assetsfileList.Find(aFile =>
+                        aFile.filePath == Path.GetDirectoryName(fileName) + "\\mainData");
                     if (mainDataFile != null)
                     {
                         assetsFile.m_Version = mainDataFile.m_Version;
@@ -254,14 +250,18 @@ namespace UnityStudio
                     }
                     else if (File.Exists(Path.GetDirectoryName(fileName) + "\\mainData"))
                     {
-                        mainDataFile = new AssetsFile(Path.GetDirectoryName(fileName) + "\\mainData", new EndianStream(File.OpenRead(Path.GetDirectoryName(fileName) + "\\mainData"), EndianType.BigEndian));
+                        mainDataFile = new AssetsFile(Path.GetDirectoryName(fileName) + "\\mainData",
+                            new EndianStream(File.OpenRead(Path.GetDirectoryName(fileName) + "\\mainData"),
+                                EndianType.BigEndian));
 
                         assetsFile.m_Version = mainDataFile.m_Version;
                         assetsFile.version = mainDataFile.version;
                         assetsFile.buildType = mainDataFile.buildType;
                     }
                 }
+
                 #endregion
+
                 progressBar1.PerformStep();
 
                 foreach (AssetsFile.UnityShared sharedFile in assetsFile.sharedAssetsList)
@@ -283,7 +283,10 @@ namespace UnityStudio
                                 Path.GetDirectoryName(fileName),
                                 sharedFileName,
                                 SearchOption.AllDirectories);
-                            if (findFiles.Length > 0) { sharedFilePath = findFiles[0]; }
+                            if (findFiles.Length > 0)
+                            {
+                                sharedFilePath = findFiles[0];
+                            }
                         }
 
                         if (File.Exists(sharedFilePath))
@@ -294,9 +297,11 @@ namespace UnityStudio
                             progressBar1.Maximum++;
                         }
                     }
-                    else { sharedFile.Index = unityFiles.IndexOf(quedSharedFile); }
+                    else
+                    {
+                        sharedFile.Index = unityFiles.IndexOf(quedSharedFile);
+                    }
                 }
-
             }
         }
 
@@ -318,11 +323,11 @@ namespace UnityStudio
                         validAssetsFile = true;
                         break;
                     case "":
-                        validAssetsFile = (memFile.fileName == "mainData" ||
-                                            Regex.IsMatch(memFile.fileName, "level.*?") ||
-                                            Regex.IsMatch(memFile.fileName, "CustomAssetBundle-.*?") ||
-                                            Regex.IsMatch(memFile.fileName, "CAB-.*?") ||
-                                            Regex.IsMatch(memFile.fileName, "BuildPlayer-.*?"));
+                        validAssetsFile = memFile.fileName == "mainData" ||
+                                          Regex.IsMatch(memFile.fileName, "level.*?") ||
+                                          Regex.IsMatch(memFile.fileName, "CustomAssetBundle-.*?") ||
+                                          Regex.IsMatch(memFile.fileName, "CAB-.*?") ||
+                                          Regex.IsMatch(memFile.fileName, "BuildPlayer-.*?");
                         break;
                 }
 
@@ -336,21 +341,23 @@ namespace UnityStudio
                 //create dummy path to be used for asset extraction
                 memFile.fileName = Path.GetDirectoryName(bundleFileName) + "\\" + memFile.fileName;
 
-                AssetsFile assetsFile = new AssetsFile(memFile.fileName, new EndianStream(memFile.memStream, EndianType.BigEndian));
-                if (assetsFile.fileGen == 6 && Path.GetFileName(bundleFileName) != "mainData") //2.6.x and earlier don't have a string version before the preload table
+                AssetsFile assetsFile = new AssetsFile(memFile.fileName,
+                    new EndianStream(memFile.memStream, EndianType.BigEndian));
+                if (assetsFile.fileGen == 6 && Path.GetFileName(bundleFileName) != "mainData"
+                ) //2.6.x and earlier don't have a string version before the preload table
                 {
                     //make use of the bundle file version
                     assetsFile.m_Version = b_File.ver3;
                     assetsFile.version = Array.ConvertAll(
-                        b_File.ver3.Split(new []
+                        b_File.ver3.Split(new[]
                             {
-                                ".", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l","m",
-                                "n","o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "\n"
+                                ".", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+                                "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "\n"
                             },
                             StringSplitOptions.RemoveEmptyEntries),
                         int.Parse);
 
-                    assetsFile.buildType = b_File.ver3.Split(new []
+                    assetsFile.buildType = b_File.ver3.Split(new[]
                         {
                             ".", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
                         },
@@ -449,7 +456,6 @@ namespace UnityStudio
                 {
                     // ReSharper disable once AssignNullToNotNullAttribute
                     Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
                 }
                 if (File.Exists(filePath))
                 {
@@ -479,8 +485,14 @@ namespace UnityStudio
                 buildClassStructuresMenuItem.Checked = debugMenuItem.Visible;
                 dontLoadAssetsMenuItem.Checked = debugMenuItem.Visible;
                 dontBuildHierarchyMenuItem.Checked = debugMenuItem.Visible;
-                if (tabControl1.TabPages.Contains(tabPage3)) { tabControl1.TabPages.Remove(tabPage3); }
-                else { tabControl1.TabPages.Add(tabPage3); }
+                if (tabControl1.TabPages.Contains(tabPage3))
+                {
+                    tabControl1.TabPages.Remove(tabPage3);
+                }
+                else
+                {
+                    tabControl1.TabPages.Add(tabPage3);
+                }
             }
         }
 
@@ -491,7 +503,10 @@ namespace UnityStudio
                 dontBuildHierarchyMenuItem.Checked = true;
                 dontBuildHierarchyMenuItem.Enabled = false;
             }
-            else { dontBuildHierarchyMenuItem.Enabled = true; }
+            else
+            {
+                dontBuildHierarchyMenuItem.Enabled = true;
+            }
         }
 
         private void exportClassStructuresMenuItem_Click(object sender, EventArgs e)
@@ -505,7 +520,9 @@ namespace UnityStudio
 
                     string savePath = saveFolderDialog1.FileName;
                     if (Path.GetFileName(savePath) == "Select folder or write folder name to create")
-                    { savePath = Path.GetDirectoryName(saveFolderDialog1.FileName); }
+                    {
+                        savePath = Path.GetDirectoryName(saveFolderDialog1.FileName);
+                    }
 
                     foreach (KeyValuePair<string, SortedDictionary<int, ClassStrStruct>> version in AllClassStructures)
                     {
@@ -540,18 +557,18 @@ namespace UnityStudio
                 switch (lastLoadedAsset.Type2)
                 {
                     case 28:
+                    {
+                        if (enablePreview.Checked && imageTexture != null)
                         {
-                            if (enablePreview.Checked && imageTexture != null)
-                            {
-                                previewPanel.BackgroundImage = imageTexture;
-                                previewPanel.BackgroundImageLayout = ImageLayout.Zoom;
-                            }
-                            else
-                            {
-                                previewPanel.BackgroundImage = Properties.Resources.preview;
-                                previewPanel.BackgroundImageLayout = ImageLayout.Center;
-                            }
+                            previewPanel.BackgroundImage = imageTexture;
+                            previewPanel.BackgroundImageLayout = ImageLayout.Zoom;
                         }
+                        else
+                        {
+                            previewPanel.BackgroundImage = Properties.Resources.preview;
+                            previewPanel.BackgroundImageLayout = ImageLayout.Center;
+                        }
+                    }
                         break;
                     case 48:
                     case 49:
@@ -561,42 +578,40 @@ namespace UnityStudio
                         fontPreviewBox.Visible = !fontPreviewBox.Visible;
                         break;
                     case 83:
+                    {
+                        FMODpanel.Visible = !FMODpanel.Visible;
+
+                        if (sound != null && channel != null)
                         {
-                            FMODpanel.Visible = !FMODpanel.Visible;
-
-                            if (sound != null && channel != null)
+                            bool playing;
+                            FMOD.RESULT result = channel.isPlaying(out playing);
+                            if (result != FMOD.RESULT.OK && result != FMOD.RESULT.ERR_INVALID_HANDLE)
                             {
-                                bool playing;
-                                FMOD.RESULT result = channel.isPlaying(out playing);
-                                if (result != FMOD.RESULT.OK && result != FMOD.RESULT.ERR_INVALID_HANDLE)
-                                {
-                                    ERRCHECK(result);
-                                }
-
-                                if (playing)
-                                {
-                                    //stop previous sound
-                                    result = channel.stop();
-                                    ERRCHECK(result);
-
-                                    FMODreset();
-                                }
-                                else if (enablePreview.Checked)
-                                {
-                                    result = system.playSound(sound, null, false, out channel);
-                                    ERRCHECK(result);
-
-                                    timer.Start();
-                                    FMODstatusLabel.Text = "Playing";
-                                    //FMODinfoLabel.Text = FMODfrequency.ToString();
-                                }
+                                ERRCHECK(result);
                             }
 
-                            break;
+                            if (playing)
+                            {
+                                //stop previous sound
+                                result = channel.stop();
+                                ERRCHECK(result);
+
+                                FMODreset();
+                            }
+                            else if (enablePreview.Checked)
+                            {
+                                result = system.playSound(sound, null, false, out channel);
+                                ERRCHECK(result);
+
+                                timer.Start();
+                                FMODstatusLabel.Text = "Playing";
+                                //FMODinfoLabel.Text = FMODfrequency.ToString();
+                            }
                         }
 
+                        break;
+                    }
                 }
-
             }
             else if (lastSelectedItem != null && enablePreview.Checked)
             {
@@ -610,8 +625,14 @@ namespace UnityStudio
 
         private void displayAssetInfo_Check(object sender, EventArgs e)
         {
-            if (displayInfo.Checked && assetInfoLabel.Text != null) { assetInfoLabel.Visible = true; }
-            else { assetInfoLabel.Visible = false; }
+            if (displayInfo.Checked && assetInfoLabel.Text != null)
+            {
+                assetInfoLabel.Visible = true;
+            }
+            else
+            {
+                assetInfoLabel.Visible = false;
+            }
 
             Properties.Settings.Default["displayInfo"] = displayInfo.Checked;
             Properties.Settings.Default.Save();
@@ -619,13 +640,13 @@ namespace UnityStudio
 
         private void MenuItem_CheckedChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default[((ToolStripMenuItem)sender).Name] = ((ToolStripMenuItem)sender).Checked;
+            Properties.Settings.Default[((ToolStripMenuItem) sender).Name] = ((ToolStripMenuItem) sender).Checked;
             Properties.Settings.Default.Save();
         }
 
         private void assetGroupOptions_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default["assetGroupOption"] = ((ToolStripComboBox)sender).SelectedIndex;
+            Properties.Settings.Default["assetGroupOption"] = ((ToolStripComboBox) sender).SelectedIndex;
             Properties.Settings.Default.Save();
         }
 
@@ -644,6 +665,7 @@ namespace UnityStudio
         private void BuildAssetStrucutres()
         {
             #region first loop - read asset data & create list
+
             if (!dontLoadAssetsMenuItem.Checked)
             {
                 assetListView.BeginUpdate();
@@ -668,73 +690,73 @@ namespace UnityStudio
                         switch (asset.Type2)
                         {
                             case 1: //GameObject
-                                {
-                                    GameObject m_GameObject = new GameObject(asset);
-                                    assetsFile.GameObjectList.Add(asset.m_PathID, m_GameObject);
-                                    totalTreeNodes++;
-                                    break;
-                                }
+                            {
+                                GameObject m_GameObject = new GameObject(asset);
+                                assetsFile.GameObjectList.Add(asset.m_PathID, m_GameObject);
+                                totalTreeNodes++;
+                                break;
+                            }
                             case 4: //Transform
-                                {
-                                    Transform m_Transform = new Transform(asset);
-                                    assetsFile.TransformList.Add(asset.m_PathID, m_Transform);
-                                    break;
-                                }
+                            {
+                                Transform m_Transform = new Transform(asset);
+                                assetsFile.TransformList.Add(asset.m_PathID, m_Transform);
+                                break;
+                            }
                             case 224: //RectTransform
-                                {
-                                    RectTransform m_Rect = new RectTransform(asset);
-                                    assetsFile.TransformList.Add(asset.m_PathID, m_Rect.m_Transform);
-                                    break;
-                                }
+                            {
+                                RectTransform m_Rect = new RectTransform(asset);
+                                assetsFile.TransformList.Add(asset.m_PathID, m_Rect.m_Transform);
+                                break;
+                            }
                             //case 21: //Material
                             case 28: //Texture2D
-                                {
-                                    Texture2D m_Texture2D = new Texture2D(asset, false);
-                                    assetsFile.exportableAssets.Add(asset);
-                                    break;
-                                }
+                            {
+                                Texture2D unused = new Texture2D(asset, false);
+                                assetsFile.exportableAssets.Add(asset);
+                                break;
+                            }
                             case 48: //Shader
                             case 49: //TextAsset
-                                {
-                                    TextAsset m_TextAsset = new TextAsset(asset, false);
-                                    assetsFile.exportableAssets.Add(asset);
-                                    break;
-                                }
+                            {
+                                TextAsset unused = new TextAsset(asset, false);
+                                assetsFile.exportableAssets.Add(asset);
+                                break;
+                            }
                             case 83: //AudioClip
-                                {
-                                    AudioClip m_AudioClip = new AudioClip(asset, false);
-                                    assetsFile.exportableAssets.Add(asset);
-                                    break;
-                                }
+                            {
+                                AudioClip unused = new AudioClip(asset, false);
+                                assetsFile.exportableAssets.Add(asset);
+                                break;
+                            }
                             //case 89: //CubeMap
                             case 128: //Font
-                                {
-                                    unityFont m_Font = new unityFont(asset, false);
-                                    assetsFile.exportableAssets.Add(asset);
-                                    break;
-                                }
+                            {
+                                unityFont unused = new unityFont(asset, false);
+                                assetsFile.exportableAssets.Add(asset);
+                                break;
+                            }
                             case 129: //PlayerSettings
-                                {
-                                    PlayerSettings plSet = new PlayerSettings(asset);
-                                    productName = plSet.productName;
-                                    base.Text = "Unity Studio - " + productName + " - " + assetsFile.m_Version + " - " + assetsFile.platformStr;
-                                    break;
-                                }
+                            {
+                                PlayerSettings plSet = new PlayerSettings(asset);
+                                productName = plSet.productName;
+                                Text = "Unity Studio - " + productName + " - " +
+                                       assetsFile.m_Version + " - " + assetsFile.platformStr;
+                                break;
+                            }
                             case 0:
                                 break;
-
                         }
 
                         progressBar1.PerformStep();
                     }
 
                     exportableAssets.AddRange(assetsFile.exportableAssets);
-                    //if (assetGroup.Items.Count > 0) { listView1.Groups.Add(assetGroup); }
                 }
 
-                if (base.Text == "Unity Studio" && assetsfileList.Count > 0)
+                if (Text == "Unity Studio" && assetsfileList.Count > 0)
                 {
-                    base.Text = "Unity Studio - no productName - " + assetsfileList[0].m_Version + " - " + assetsfileList[0].platformStr;
+                    Text = "Unity Studio - no productName - " +
+                           assetsfileList[0].m_Version + " - " + assetsfileList[0].platformStr;
                 }
 
                 visibleAssets = exportableAssets;
@@ -746,9 +768,11 @@ namespace UnityStudio
                 assetListView.EndUpdate();
                 progressBar1.Value = 0;
             }
+
             #endregion
 
             #region second loop - build tree structure
+
             if (!dontBuildHierarchyMenuItem.Checked)
             {
                 sceneTreeView.BeginUpdate();
@@ -758,9 +782,12 @@ namespace UnityStudio
                 foreach (AssetsFile assetsFile in assetsfileList)
                 {
                     StatusStripUpdate("Building tree structure from " + Path.GetFileName(assetsFile.filePath));
-                    GameObject fileNode = new GameObject(null);
-                    fileNode.Text = Path.GetFileName(assetsFile.filePath);
-                    fileNode.m_Name = "RootNode";
+                    GameObject fileNode = new GameObject(null)
+                    {
+                        // ReSharper disable once AssignNullToNotNullAttribute
+                        Text = Path.GetFileName(assetsFile.filePath),
+                        m_Name = "RootNode"
+                    };
 
                     foreach (GameObject m_GameObject in assetsFile.GameObjectList.Values)
                     {
@@ -785,7 +812,10 @@ namespace UnityStudio
                     }
 
 
-                    if (fileNode.Nodes.Count == 0) { fileNode.Text += " (no children)"; }
+                    if (fileNode.Nodes.Count == 0)
+                    {
+                        fileNode.Text += " (no children)";
+                    }
                     sceneTreeView.Nodes.Add(fileNode);
                 }
                 sceneTreeView.EndUpdate();
@@ -793,17 +823,21 @@ namespace UnityStudio
 
                 if (File.Exists(mainPath + "\\materials.json"))
                 {
-                    string matLine = "";
+                    string matLine;
                     using (StreamReader reader = File.OpenText(mainPath + "\\materials.json"))
-                    { matLine = reader.ReadToEnd(); }
+                    {
+                        matLine = reader.ReadToEnd();
+                    }
 
-                    jsonMats = new JavaScriptSerializer().Deserialize<Dictionary<string, Dictionary<string, string>>>(matLine);
-                    //var jsonMats = new JavaScriptSerializer().DeserializeObject(matLine);
+                    jsonMats =
+                        new JavaScriptSerializer().Deserialize<Dictionary<string, Dictionary<string, string>>>(matLine);
                 }
             }
+
             #endregion
 
             #region build list of class strucutres
+
             if (buildClassStructuresMenuItem.Checked)
             {
                 //group class structures by versionv
@@ -817,7 +851,10 @@ namespace UnityStudio
                             curVer[uClass.Key] = uClass.Value;
                         }
                     }
-                    else { AllClassStructures.Add(assetsFile.m_Version, assetsFile.ClassStructures); }
+                    else
+                    {
+                        AllClassStructures.Add(assetsFile.m_Version, assetsFile.ClassStructures);
+                    }
                 }
 
                 classesListView.BeginUpdate();
@@ -834,9 +871,11 @@ namespace UnityStudio
                 }
                 classesListView.EndUpdate();
             }
+
             #endregion
 
-            StatusStripUpdate("Finished loading " + assetsfileList.Count.ToString() + " files with " + (assetListView.Items.Count + sceneTreeView.Nodes.Count).ToString() + " exportable assets.");
+            StatusStripUpdate("Finished loading " + assetsfileList.Count + " files with " +
+                              assetListView.Items.Count + sceneTreeView.Nodes.Count + " exportable assets.");
 
             progressBar1.Value = 0;
             treeSearch.Select();
@@ -853,7 +892,9 @@ namespace UnityStudio
         {
             switch (e.TabPageIndex)
             {
-                case 0: treeSearch.Select(); break;
+                case 0:
+                    treeSearch.Select();
+                    break;
                 case 1:
                     resizeAssetListColumns(); //required because the ListView is not visible on app launch
                     classPreviewPanel.Visible = false;
@@ -869,7 +910,8 @@ namespace UnityStudio
 
         private void treeSearch_MouseEnter(object sender, EventArgs e)
         {
-            treeTip.Show("Search with * ? widcards. Enter to scroll through results, Ctrl+Enter to select all results.", treeSearch, 5000);
+            treeTip.Show("Search with * ? widcards. Enter to scroll through results, Ctrl+Enter to select all results.",
+                treeSearch, 5000);
         }
 
         private void treeSearch_Enter(object sender, EventArgs e)
@@ -886,7 +928,7 @@ namespace UnityStudio
             if (treeSearch.Text == "")
             {
                 treeSearch.Text = " Search ";
-                treeSearch.ForeColor = System.Drawing.SystemColors.GrayText;
+                treeSearch.ForeColor = SystemColors.GrayText;
             }
         }
 
@@ -897,9 +939,15 @@ namespace UnityStudio
                 if (GObject.Text.Like(treeSearch.Text))
                 {
                     GObject.Checked = !GObject.Checked;
-                    if (GObject.Checked) { GObject.EnsureVisible(); }
+                    if (GObject.Checked)
+                    {
+                        GObject.EnsureVisible();
+                    }
                 }
-                else { recurseTreeCheck(GObject.Nodes); }
+                else
+                {
+                    recurseTreeCheck(GObject.Nodes);
+                }
             }
         }
 
@@ -919,7 +967,10 @@ namespace UnityStudio
                     {
                         foreach (GameObject GObject in aFile.GameObjectList.Values)
                         {
-                            if (GObject.Text.Like(treeSearch.Text)) { treeSrcResults.Add(GObject); }
+                            if (GObject.Text.Like(treeSearch.Text))
+                            {
+                                treeSrcResults.Add(GObject);
+                            }
                         }
                     }
                 }
@@ -936,7 +987,10 @@ namespace UnityStudio
                 {
                     if (treeSrcResults.Count > 0)
                     {
-                        if (nextGObject >= treeSrcResults.Count) { nextGObject = 0; }
+                        if (nextGObject >= treeSrcResults.Count)
+                        {
+                            nextGObject = 0;
+                        }
                         treeSrcResults[nextGObject].EnsureVisible();
                         sceneTreeView.SelectedNode = treeSrcResults[nextGObject];
                         nextGObject++;
@@ -961,8 +1015,11 @@ namespace UnityStudio
             assetListView.AutoResizeColumn(2, ColumnHeaderAutoResizeStyle.ColumnContent);
 
             int vscrollwidth = SystemInformation.VerticalScrollBarWidth;
-            bool hasvscroll = ((float)visibleAssets.Count / (float)assetListView.Height) > 0.0567f;
-            columnHeaderName.Width = assetListView.Width - columnHeaderType.Width - columnHeaderSize.Width - (hasvscroll ? (5 + vscrollwidth) : 5);
+            bool hasvscroll = visibleAssets.Count / (float) assetListView.Height > 0.0567f;
+            columnHeaderName.Width = assetListView.Width
+                                     - columnHeaderType.Width
+                                     - columnHeaderSize.Width
+                                     - (hasvscroll ? 5 + vscrollwidth : 5);
         }
 
         private void tabPage2_Resize(object sender, EventArgs e)
@@ -975,7 +1032,7 @@ namespace UnityStudio
             if (listSearch.Text == " Filter ")
             {
                 listSearch.Text = "";
-                listSearch.ForeColor = System.Drawing.SystemColors.WindowText;
+                listSearch.ForeColor = SystemColors.WindowText;
                 enableFiltering = true;
             }
         }
@@ -986,7 +1043,7 @@ namespace UnityStudio
             {
                 enableFiltering = false;
                 listSearch.Text = " Filter ";
-                listSearch.ForeColor = System.Drawing.SystemColors.GrayText;
+                listSearch.ForeColor = SystemColors.GrayText;
             }
         }
 
@@ -996,8 +1053,8 @@ namespace UnityStudio
             {
                 assetListView.BeginUpdate();
                 assetListView.SelectedIndices.Clear();
-                //visibleListAssets = exportableAssets.FindAll(ListAsset => ListAsset.Text.StartsWith(ListSearch.Text, System.StringComparison.CurrentCultureIgnoreCase));
-                visibleAssets = exportableAssets.FindAll(ListAsset => ListAsset.Text.IndexOf(listSearch.Text, System.StringComparison.CurrentCultureIgnoreCase) >= 0);
+                visibleAssets = exportableAssets.FindAll(ListAsset =>
+                    ListAsset.Text.IndexOf(listSearch.Text, StringComparison.CurrentCultureIgnoreCase) >= 0);
                 assetListView.VirtualListSize = visibleAssets.Count;
                 assetListView.EndUpdate();
             }
@@ -1011,7 +1068,10 @@ namespace UnityStudio
                 reverseSort = false;
                 secondSortColumn = firstSortColumn;
             }
-            else { reverseSort = !reverseSort; }
+            else
+            {
+                reverseSort = !reverseSort;
+            }
             firstSortColumn = e.Column;
 
             assetListView.BeginUpdate();
@@ -1019,27 +1079,50 @@ namespace UnityStudio
             switch (e.Column)
             {
                 case 0:
-                    visibleAssets.Sort(delegate (AssetPreloadData a, AssetPreloadData b)
+                    visibleAssets.Sort(delegate(AssetPreloadData a, AssetPreloadData b)
                     {
-                        int xdiff = reverseSort ? b.Text.CompareTo(a.Text) : a.Text.CompareTo(b.Text);
-                        if (xdiff != 0) return xdiff;
-                        else return secondSortColumn == 1 ? a.TypeString.CompareTo(b.TypeString) : a.exportSize.CompareTo(b.exportSize);
+                        int xdiff = reverseSort
+                            ? string.Compare(b.Text, a.Text, StringComparison.InvariantCulture)
+                            : string.Compare(a.Text, b.Text, StringComparison.InvariantCulture);
+
+                        if (xdiff != 0)
+                            return xdiff;
+
+                        return secondSortColumn == 1
+                            ? string.Compare(a.TypeString, b.TypeString, StringComparison.InvariantCulture)
+                            : a.exportSize.CompareTo(b.exportSize);
                     });
                     break;
+
                 case 1:
-                    visibleAssets.Sort(delegate (AssetPreloadData a, AssetPreloadData b)
+                    visibleAssets.Sort(delegate(AssetPreloadData a, AssetPreloadData b)
                     {
-                        int xdiff = reverseSort ? b.TypeString.CompareTo(a.TypeString) : a.TypeString.CompareTo(b.TypeString);
-                        if (xdiff != 0) return xdiff;
-                        else return secondSortColumn == 2 ? a.exportSize.CompareTo(b.exportSize) : a.Text.CompareTo(b.Text);
+                        int xdiff = reverseSort
+                            ? string.Compare(b.TypeString, a.TypeString, StringComparison.InvariantCulture)
+                            : string.Compare(a.TypeString, b.TypeString, StringComparison.InvariantCulture);
+
+                        if (xdiff != 0)
+                            return xdiff;
+
+                        return secondSortColumn == 2
+                            ? a.exportSize.CompareTo(b.exportSize)
+                            : string.Compare(a.Text, b.Text, StringComparison.InvariantCulture);
                     });
                     break;
+
                 case 2:
-                    visibleAssets.Sort(delegate (AssetPreloadData a, AssetPreloadData b)
+                    visibleAssets.Sort(delegate(AssetPreloadData a, AssetPreloadData b)
                     {
-                        int xdiff = reverseSort ? b.exportSize.CompareTo(a.exportSize) : a.exportSize.CompareTo(b.exportSize);
-                        if (xdiff != 0) return xdiff;
-                        else return secondSortColumn == 1 ? a.TypeString.CompareTo(b.TypeString) : a.Text.CompareTo(b.Text);
+                        int xdiff = reverseSort
+                            ? b.exportSize.CompareTo(a.exportSize)
+                            : a.exportSize.CompareTo(b.exportSize);
+
+                        if (xdiff != 0)
+                            return xdiff;
+
+                        return secondSortColumn == 1
+                            ? string.Compare(a.TypeString, b.TypeString, StringComparison.InvariantCulture)
+                            : string.Compare(a.Text, b.Text, StringComparison.InvariantCulture);
                     });
                     break;
             }
@@ -1064,12 +1147,15 @@ namespace UnityStudio
 
             FMODreset();
 
-            lastSelectedItem = (AssetPreloadData)e.Item;
+            lastSelectedItem = (AssetPreloadData) e.Item;
 
             if (e.IsSelected)
             {
                 assetInfoLabel.Text = lastSelectedItem.InfoText;
-                if (displayInfo.Checked && assetInfoLabel.Text != null) { assetInfoLabel.Visible = true; } //only display the label if asset has info text
+                if (displayInfo.Checked && assetInfoLabel.Text != null)
+                {
+                    assetInfoLabel.Visible = true;
+                } //only display the label if asset has info text
 
                 if (enablePreview.Checked)
                 {
@@ -1083,7 +1169,7 @@ namespace UnityStudio
         {
             if (e.IsSelected)
             {
-                classTextBox.Text = ((ClassStrStruct)classesListView.SelectedItems[0]).members;
+                classTextBox.Text = ((ClassStrStruct) classesListView.SelectedItems[0]).members;
             }
         }
 
@@ -1092,229 +1178,197 @@ namespace UnityStudio
             switch (asset.Type2)
             {
                 #region Texture2D
+
                 case 28: //Texture2D
+                {
+                    Texture2D m_Texture2D = new Texture2D(asset, true);
+
+                    if (m_Texture2D.m_TextureFormat < 30)
                     {
-                        Texture2D m_Texture2D = new Texture2D(asset, true);
+                        byte[] imageBuffer = new byte[128 + m_Texture2D.image_data_size];
 
-                        if (m_Texture2D.m_TextureFormat < 30)
-                        {
-                            byte[] imageBuffer = new byte[128 + m_Texture2D.image_data_size];
+                        imageBuffer[0] = 0x44;
+                        imageBuffer[1] = 0x44;
+                        imageBuffer[2] = 0x53;
+                        imageBuffer[3] = 0x20;
+                        imageBuffer[4] = 0x7c;
 
-                            imageBuffer[0] = 0x44;
-                            imageBuffer[1] = 0x44;
-                            imageBuffer[2] = 0x53;
-                            imageBuffer[3] = 0x20;
-                            imageBuffer[4] = 0x7c;
+                        BitConverter.GetBytes(m_Texture2D.dwFlags).CopyTo(imageBuffer, 8);
+                        BitConverter.GetBytes(m_Texture2D.m_Height).CopyTo(imageBuffer, 12);
+                        BitConverter.GetBytes(m_Texture2D.m_Width).CopyTo(imageBuffer, 16);
+                        BitConverter.GetBytes(m_Texture2D.dwPitchOrLinearSize).CopyTo(imageBuffer, 20);
+                        BitConverter.GetBytes(m_Texture2D.dwMipMapCount).CopyTo(imageBuffer, 28);
+                        BitConverter.GetBytes(m_Texture2D.dwSize).CopyTo(imageBuffer, 76);
+                        BitConverter.GetBytes(m_Texture2D.dwFlags2).CopyTo(imageBuffer, 80);
+                        BitConverter.GetBytes(m_Texture2D.dwFourCC).CopyTo(imageBuffer, 84);
+                        BitConverter.GetBytes(m_Texture2D.dwRGBBitCount).CopyTo(imageBuffer, 88);
+                        BitConverter.GetBytes(m_Texture2D.dwRBitMask).CopyTo(imageBuffer, 92);
+                        BitConverter.GetBytes(m_Texture2D.dwGBitMask).CopyTo(imageBuffer, 96);
+                        BitConverter.GetBytes(m_Texture2D.dwBBitMask).CopyTo(imageBuffer, 100);
+                        BitConverter.GetBytes(m_Texture2D.dwABitMask).CopyTo(imageBuffer, 104);
+                        BitConverter.GetBytes(m_Texture2D.dwCaps).CopyTo(imageBuffer, 108);
+                        BitConverter.GetBytes(m_Texture2D.dwCaps2).CopyTo(imageBuffer, 112);
 
-                            BitConverter.GetBytes(m_Texture2D.dwFlags).CopyTo(imageBuffer, 8);
-                            BitConverter.GetBytes(m_Texture2D.m_Height).CopyTo(imageBuffer, 12);
-                            BitConverter.GetBytes(m_Texture2D.m_Width).CopyTo(imageBuffer, 16);
-                            BitConverter.GetBytes(m_Texture2D.dwPitchOrLinearSize).CopyTo(imageBuffer, 20);
-                            BitConverter.GetBytes(m_Texture2D.dwMipMapCount).CopyTo(imageBuffer, 28);
-                            BitConverter.GetBytes(m_Texture2D.dwSize).CopyTo(imageBuffer, 76);
-                            BitConverter.GetBytes(m_Texture2D.dwFlags2).CopyTo(imageBuffer, 80);
-                            BitConverter.GetBytes(m_Texture2D.dwFourCC).CopyTo(imageBuffer, 84);
-                            BitConverter.GetBytes(m_Texture2D.dwRGBBitCount).CopyTo(imageBuffer, 88);
-                            BitConverter.GetBytes(m_Texture2D.dwRBitMask).CopyTo(imageBuffer, 92);
-                            BitConverter.GetBytes(m_Texture2D.dwGBitMask).CopyTo(imageBuffer, 96);
-                            BitConverter.GetBytes(m_Texture2D.dwBBitMask).CopyTo(imageBuffer, 100);
-                            BitConverter.GetBytes(m_Texture2D.dwABitMask).CopyTo(imageBuffer, 104);
-                            BitConverter.GetBytes(m_Texture2D.dwCaps).CopyTo(imageBuffer, 108);
-                            BitConverter.GetBytes(m_Texture2D.dwCaps2).CopyTo(imageBuffer, 112);
+                        m_Texture2D.image_data.CopyTo(imageBuffer, 128);
 
-                            m_Texture2D.image_data.CopyTo(imageBuffer, 128);
-
-                            imageTexture = DDSDataToBMP(imageBuffer);
-                            imageTexture.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                            previewPanel.BackgroundImage = imageTexture;
-                            previewPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-                        }
-                        else { StatusStripUpdate("Unsupported image for preview. Try to export."); }
-                        break;
+                        imageTexture = DDSDataToBMP(imageBuffer);
+                        imageTexture.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                        previewPanel.BackgroundImage = imageTexture;
+                        previewPanel.BackgroundImageLayout = ImageLayout.Zoom;
                     }
+                    else
+                    {
+                        StatusStripUpdate("Unsupported image for preview. Try to export.");
+                    }
+                    break;
+                }
+
                 #endregion
+
                 #region AudioClip
+
                 case 83: //AudioClip
-                    {
-                        AudioClip m_AudioClip = new AudioClip(asset, true);
+                {
+                    AudioClip m_AudioClip = new AudioClip(asset, true);
 
-                        //MemoryStream memoryStream = new MemoryStream(m_AudioData, true);
-                        //System.Media.SoundPlayer soundPlayer = new System.Media.SoundPlayer(memoryStream);
-                        //soundPlayer.Play();
+                    FMOD.CREATESOUNDEXINFO exinfo = new FMOD.CREATESOUNDEXINFO();
 
-                        FMOD.RESULT result;
-                        FMOD.CREATESOUNDEXINFO exinfo = new FMOD.CREATESOUNDEXINFO();
+                    exinfo.cbsize = Marshal.SizeOf(exinfo);
+                    exinfo.length = (uint) m_AudioClip.m_Size;
 
-                        exinfo.cbsize = Marshal.SizeOf(exinfo);
-                        exinfo.length = (uint)m_AudioClip.m_Size;
+                    FMOD.RESULT result = system.createSound(
+                        m_AudioClip.m_AudioData,
+                        FMOD.MODE.OPENMEMORY | loopMode,
+                        ref exinfo,
+                        out sound);
 
-                        result = system.createSound(m_AudioClip.m_AudioData, (FMOD.MODE.OPENMEMORY | loopMode), ref exinfo, out sound);
-                        if (ERRCHECK(result)) { break; }
-
-                        result = sound.getLength(out FMODlenms, FMOD.TIMEUNIT.MS);
-                        if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
-                        {
-                            if (ERRCHECK(result)) { break; }
-                        }
-
-                        result = system.playSound(sound, null, false, out channel);
-                        if (ERRCHECK(result)) { break; }
-
-                        timer.Start();
-                        FMODstatusLabel.Text = "Playing";
-                        FMODpanel.Visible = true;
-
-                        //result = channel.getChannelGroup(out channelGroup);
-                        //if (ERRCHECK(result)) { break; }
-
-                        result = channel.getFrequency(out FMODfrequency);
-                        ERRCHECK(result);
-
-                        FMODinfoLabel.Text = FMODfrequency.ToString() + " Hz";
+                    if (ERRCHECK(result))
                         break;
+
+                    result = sound.getLength(out FMODlenms, FMOD.TIMEUNIT.MS);
+                    if (result != FMOD.RESULT.OK && result != FMOD.RESULT.ERR_INVALID_HANDLE)
+                    {
+                        if (ERRCHECK(result))
+                            break;
                     }
+
+                    result = system.playSound(sound, null, false, out channel);
+                    if (ERRCHECK(result))
+                        break;
+
+                    timer.Start();
+                    FMODstatusLabel.Text = "Playing";
+                    FMODpanel.Visible = true;
+
+                    //result = channel.getChannelGroup(out channelGroup);
+                    //if (ERRCHECK(result)) { break; }
+
+                    result = channel.getFrequency(out FMODfrequency);
+                    ERRCHECK(result);
+
+                    FMODinfoLabel.Text = FMODfrequency + " Hz";
+                    break;
+                }
+
                 #endregion
+
                 #region Shader & TextAsset
+
                 case 48:
                 case 49:
-                    {
-                        TextAsset m_TextAsset = new TextAsset(asset, true);
+                {
+                    TextAsset m_TextAsset = new TextAsset(asset, true);
 
-                        string m_Script_Text = UnicodeEncoding.UTF8.GetString(m_TextAsset.m_Script);
-                        m_Script_Text = Regex.Replace(m_Script_Text, "(?<!\r)\n", "\r\n");
-                        textPreviewBox.Text = m_Script_Text;
-                        textPreviewBox.Visible = true;
+                    string m_Script_Text = Encoding.UTF8.GetString(m_TextAsset.m_Script);
+                    m_Script_Text = Regex.Replace(m_Script_Text, "(?<!\r)\n", "\r\n");
+                    textPreviewBox.Text = m_Script_Text;
+                    textPreviewBox.Visible = true;
 
-                        break;
-                    }
+                    break;
+                }
+
                 #endregion
+
                 #region Font
+
                 case 128: //Font
+                {
+                    unityFont m_Font = new unityFont(asset, true);
+
+                    if (asset.extension != ".otf" && m_Font.m_FontData != null)
                     {
-                        unityFont m_Font = new unityFont(asset, true);
+                        IntPtr data = Marshal.AllocCoTaskMem(m_Font.m_FontData.Length);
+                        Marshal.Copy(m_Font.m_FontData, 0, data, m_Font.m_FontData.Length);
 
-                        if (asset.extension != ".otf" && m_Font.m_FontData != null)
+                        // We HAVE to do this to register the font to the system (Weird .NET bugs)
+                        uint cFonts = 0;
+                        AddFontMemResourceEx(data, (uint) m_Font.m_FontData.Length, IntPtr.Zero, ref cFonts);
+
+                        pfc = new System.Drawing.Text.PrivateFontCollection();
+                        pfc.AddMemoryFont(data, m_Font.m_FontData.Length);
+                        Marshal.FreeCoTaskMem(data);
+
+                        if (pfc.Families.Length > 0)
                         {
-                            IntPtr data = Marshal.AllocCoTaskMem(m_Font.m_FontData.Length);
-                            Marshal.Copy(m_Font.m_FontData, 0, data, m_Font.m_FontData.Length);
-
-                            // We HAVE to do this to register the font to the system (Weird .NET bug !)
-                            uint cFonts = 0;
-                            AddFontMemResourceEx(data, (uint)m_Font.m_FontData.Length, IntPtr.Zero, ref cFonts);
-
-                            pfc = new System.Drawing.Text.PrivateFontCollection();
-                            pfc.AddMemoryFont(data, m_Font.m_FontData.Length);
-                            Marshal.FreeCoTaskMem(data);
-
-                            if (pfc.Families.Length > 0)
-                            {
-                                //textPreviewBox.Font = new Font(pfc.Families[0], 16, FontStyle.Regular);
-                                //textPreviewBox.Text = "abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWYZ\r\n1234567890.:,;'\"(!?)+-*/=\r\nThe quick brown fox jumps over the lazy dog. 1234567890";
-                                fontPreviewBox.SelectionStart = 0;
-                                fontPreviewBox.SelectionLength = 80;
-                                fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 16, FontStyle.Regular);
-                                fontPreviewBox.SelectionStart = 81;
-                                fontPreviewBox.SelectionLength = 56;
-                                fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 12, FontStyle.Regular);
-                                fontPreviewBox.SelectionStart = 138;
-                                fontPreviewBox.SelectionLength = 56;
-                                fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 18, FontStyle.Regular);
-                                fontPreviewBox.SelectionStart = 195;
-                                fontPreviewBox.SelectionLength = 56;
-                                fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 24, FontStyle.Regular);
-                                fontPreviewBox.SelectionStart = 252;
-                                fontPreviewBox.SelectionLength = 56;
-                                fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 36, FontStyle.Regular);
-                                fontPreviewBox.SelectionStart = 309;
-                                fontPreviewBox.SelectionLength = 56;
-                                fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 48, FontStyle.Regular);
-                                fontPreviewBox.SelectionStart = 366;
-                                fontPreviewBox.SelectionLength = 56;
-                                fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 60, FontStyle.Regular);
-                                fontPreviewBox.SelectionStart = 423;
-                                fontPreviewBox.SelectionLength = 55;
-                                fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 72, FontStyle.Regular);
-                                fontPreviewBox.Visible = true;
-                            }
+                            fontPreviewBox.SelectionStart = 0;
+                            fontPreviewBox.SelectionLength = 80;
+                            fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 16, FontStyle.Regular);
+                            fontPreviewBox.SelectionStart = 81;
+                            fontPreviewBox.SelectionLength = 56;
+                            fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 12, FontStyle.Regular);
+                            fontPreviewBox.SelectionStart = 138;
+                            fontPreviewBox.SelectionLength = 56;
+                            fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 18, FontStyle.Regular);
+                            fontPreviewBox.SelectionStart = 195;
+                            fontPreviewBox.SelectionLength = 56;
+                            fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 24, FontStyle.Regular);
+                            fontPreviewBox.SelectionStart = 252;
+                            fontPreviewBox.SelectionLength = 56;
+                            fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 36, FontStyle.Regular);
+                            fontPreviewBox.SelectionStart = 309;
+                            fontPreviewBox.SelectionLength = 56;
+                            fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 48, FontStyle.Regular);
+                            fontPreviewBox.SelectionStart = 366;
+                            fontPreviewBox.SelectionLength = 56;
+                            fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 60, FontStyle.Regular);
+                            fontPreviewBox.SelectionStart = 423;
+                            fontPreviewBox.SelectionLength = 55;
+                            fontPreviewBox.SelectionFont = new Font(pfc.Families[0], 72, FontStyle.Regular);
+                            fontPreviewBox.Visible = true;
                         }
-                        else { StatusStripUpdate("Unsupported font for preview. Try to export."); }
-
-                        break;
                     }
+                    else
+                    {
+                        StatusStripUpdate("Unsupported font for preview. Try to export.");
+                    }
+
+                    break;
+                }
+
                 #endregion
             }
-        }
-
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            FMOD.RESULT result;
-            uint ms = 0;
-            bool playing = false;
-            bool paused = false;
-
-            if (channel != null)
-            {
-                result = channel.getPosition(out ms, FMOD.TIMEUNIT.MS);
-                if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
-                {
-                    ERRCHECK(result);
-                }
-
-                result = channel.isPlaying(out playing);
-                if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
-                {
-                    ERRCHECK(result);
-                }
-
-                result = channel.getPaused(out paused);
-                if ((result != FMOD.RESULT.OK) && (result != FMOD.RESULT.ERR_INVALID_HANDLE))
-                {
-                    ERRCHECK(result);
-                }
-            }
-
-            //statusBar.Text = "Time " + (ms / 1000 / 60) + ":" + (ms / 1000 % 60) + ":" + (ms / 10 % 100) + "/" + (lenms / 1000 / 60) + ":" + (lenms / 1000 % 60) + ":" + (lenms / 10 % 100) + " : " + (paused ? "Paused " : playing ? "Playing" : "Stopped");
-            FMODtimerLabel.Text = (ms / 1000 / 60) + ":" + (ms / 1000 % 60) + "." + (ms / 10 % 100) + " / " + (FMODlenms / 1000 / 60) + ":" + (FMODlenms / 1000 % 60) + "." + (FMODlenms / 10 % 100);
-            FMODprogressBar.Value = (int)(ms * 1000 / FMODlenms);
-            FMODstatusLabel.Text = (paused ? "Paused " : playing ? "Playing" : "Stopped");
-
-            if (system != null)
-            {
-                system.update();
-            }
-        }
-
-        private bool ERRCHECK(FMOD.RESULT result)
-        {
-            if (result != FMOD.RESULT.OK)
-            {
-                //FMODinit();
-                FMODreset();
-                StatusStripUpdate("FMOD error! " + result + " - " + FMOD.Error.String(result));
-                //Environment.Exit(-1);
-                return true;
-            }
-            else { return false; }
         }
 
         private void Export3DObjects_Click(object sender, EventArgs e)
         {
             if (sceneTreeView.Nodes.Count > 0)
             {
-                bool exportSwitch = (((ToolStripItem)sender).Name == "exportAll3DMenuItem") ? true : false;
-
+                bool exportSwitch = ((ToolStripItem) sender).Name == "exportAll3DMenuItem";
 
                 DateTime timestamp = DateTime.Now;
                 saveFileDialog1.FileName = productName + timestamp.ToString("_yy_MM_dd__HH_mm_ss");
-                //extension will be added by the file save dialog
 
+                //extension will be added by the file save dialog
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    switch ((bool)Properties.Settings.Default["showExpOpt"])
+                    switch ((bool) Properties.Settings.Default["showExpOpt"])
                     {
                         case true:
                             ExportOptions exportOpt = new ExportOptions();
-                            if (exportOpt.ShowDialog() == DialogResult.OK) { goto case false; }
+                            if (exportOpt.ShowDialog() == DialogResult.OK)
+                            {
+                                goto case false;
+                            }
                             break;
                         case false:
                             switch (saveFileDialog1.FilterIndex)
@@ -1326,13 +1380,18 @@ namespace UnityStudio
                                     break;
                             }
 
-                            if (openAfterExport.Checked && File.Exists(saveFileDialog1.FileName)) { System.Diagnostics.Process.Start(saveFileDialog1.FileName); }
+                            if (openAfterExport.Checked && File.Exists(saveFileDialog1.FileName))
+                            {
+                                System.Diagnostics.Process.Start(saveFileDialog1.FileName);
+                            }
                             break;
                     }
                 }
-
             }
-            else { StatusStripUpdate("No Objects available for export"); }
+            else
+            {
+                StatusStripUpdate("No Objects available for export");
+            }
         }
 
         private void WriteFBX(string FBXfile, bool allNodes)
@@ -1346,13 +1405,13 @@ namespace UnityStudio
                 StringBuilder cb = new StringBuilder(); //Connections builder
                 StringBuilder mb = new StringBuilder(); //Materials builder to get texture count in advance
                 StringBuilder cb2 = new StringBuilder(); //and keep connections ordered
-                cb.Append("\n}\n");//Objects end
+                cb.Append("\n}\n"); //Objects end
                 cb.Append("\nConnections:  {");
 
                 HashSet<GameObject> GameObjects = new HashSet<GameObject>();
                 HashSet<GameObject> LimbNodes = new HashSet<GameObject>();
                 HashSet<AssetPreloadData> Skins = new HashSet<AssetPreloadData>();
-                HashSet<AssetPreloadData> Meshes = new HashSet<AssetPreloadData>();//MeshFilters are not unique!!
+                HashSet<AssetPreloadData> Meshes = new HashSet<AssetPreloadData>(); //MeshFilters are not unique!!
                 HashSet<AssetPreloadData> Materials = new HashSet<AssetPreloadData>();
                 HashSet<AssetPreloadData> Textures = new HashSet<AssetPreloadData>();
 
@@ -1372,6 +1431,7 @@ namespace UnityStudio
                 */
 
                 #region loop nodes and collect objects for export
+
                 foreach (AssetsFile assetsFile in assetsfileList)
                 {
                     foreach (GameObject m_GameObject in assetsFile.GameObjectList.Values)
@@ -1399,6 +1459,7 @@ namespace UnityStudio
                             }
 
                             #region get Renderer
+
                             AssetPreloadData RendererPD;
                             if (assetsfileList.TryGetPD(m_GameObject.m_Renderer, out RendererPD))
                             {
@@ -1411,13 +1472,16 @@ namespace UnityStudio
                                     {
                                         Materials.Add(MaterialPD);
                                         cb2.AppendFormat("\n\n\t;Material::, Model::{0}", m_GameObject.m_Name);
-                                        cb2.AppendFormat("\n\tC: \"OO\",6{0},1{1}", MaterialPD.uniqueID, m_GameObject.uniqueID);
+                                        cb2.AppendFormat("\n\tC: \"OO\",6{0},1{1}", MaterialPD.uniqueID,
+                                            m_GameObject.uniqueID);
                                     }
                                 }
                             }
+
                             #endregion
 
                             #region get SkinnedMeshRenderer
+
                             AssetPreloadData SkinnedMeshPD;
                             if (assetsfileList.TryGetPD(m_GameObject.m_SkinnedMeshRenderer, out SkinnedMeshPD))
                             {
@@ -1432,11 +1496,12 @@ namespace UnityStudio
                                     {
                                         Materials.Add(MaterialPD);
                                         cb2.AppendFormat("\n\n\t;Material::, Model::{0}", m_GameObject.m_Name);
-                                        cb2.AppendFormat("\n\tC: \"OO\",6{0},1{1}", MaterialPD.uniqueID, m_GameObject.uniqueID);
+                                        cb2.AppendFormat("\n\tC: \"OO\",6{0},1{1}", MaterialPD.uniqueID,
+                                            m_GameObject.uniqueID);
                                     }
                                 }
 
-                                if ((bool)Properties.Settings.Default["exportDeformers"])
+                                if ((bool) Properties.Settings.Default["exportDeformers"])
                                 {
                                     DeformerCount += m_SkinnedMeshRenderer.m_Bones.Length;
 
@@ -1451,32 +1516,40 @@ namespace UnityStudio
                                             {
                                                 LimbNodes.Add(m_Bone);
                                                 //also collect the root bone
-                                                if (m_Bone.Parent.Level > 0) { LimbNodes.Add((GameObject)m_Bone.Parent); }
+                                                if (m_Bone.Parent.Level > 0)
+                                                {
+                                                    LimbNodes.Add((GameObject) m_Bone.Parent);
+                                                }
                                                 //should I collect siblings?
                                             }
 
                                             #region collect children because m_SkinnedMeshRenderer.m_Bones doesn't contain terminations
+
                                             foreach (PPtr ChildPPtr in b_Transform.m_Children)
                                             {
                                                 Transform ChildTR;
                                                 if (assetsfileList.TryGetTransform(ChildPPtr, out ChildTR))
                                                 {
                                                     GameObject m_Child;
-                                                    if (assetsfileList.TryGetGameObject(ChildTR.m_GameObject, out m_Child))
+                                                    if (assetsfileList.TryGetGameObject(ChildTR.m_GameObject,
+                                                        out m_Child))
                                                     {
                                                         //check that the Model doesn't contain a Mesh, although this won't ensure it's part of the skeleton
-                                                        if (m_Child.m_MeshFilter == null && m_Child.m_SkinnedMeshRenderer == null)
+                                                        if (m_Child.m_MeshFilter == null &&
+                                                            m_Child.m_SkinnedMeshRenderer == null)
                                                         {
                                                             LimbNodes.Add(m_Child);
                                                         }
                                                     }
                                                 }
                                             }
+
                                             #endregion
                                         }
                                     }
                                 }
                             }
+
                             #endregion
                         }
                     }
@@ -1486,15 +1559,18 @@ namespace UnityStudio
                 //else { GameObjects.UnionWith(LimbNodes); LimbNodes.Clear(); }
                 //add either way and use LimbNodes to test if a node is Null or LimbNode
                 GameObjects.UnionWith(LimbNodes);
+
                 #endregion
 
                 #region write Materials, collect Texture objects
+
                 StatusStripUpdate("Writing Materials");
                 foreach (AssetPreloadData MaterialPD in Materials)
                 {
                     Material m_Material = new Material(MaterialPD);
 
-                    mb.AppendFormat("\n\tMaterial: 6{0}, \"Material::{1}\", \"\" {{", MaterialPD.uniqueID, m_Material.m_Name);
+                    mb.AppendFormat("\n\tMaterial: 6{0}, \"Material::{1}\", \"\" {{", MaterialPD.uniqueID,
+                        m_Material.m_Name);
                     mb.Append("\n\t\tVersion: 102");
                     mb.Append("\n\t\tShadingModel: \"phong\"");
                     mb.Append("\n\t\tMultiLayer: 0");
@@ -1502,46 +1578,60 @@ namespace UnityStudio
                     mb.Append("\n\t\t\tP: \"ShadingModel\", \"KString\", \"\", \"\", \"phong\"");
 
                     #region write material colors
+
                     foreach (StrColorPair m_Color in m_Material.m_Colors)
                     {
                         switch (m_Color.first)
                         {
                             case "_Color":
                             case "gSurfaceColor":
-                                mb.AppendFormat("\n\t\t\tP: \"DiffuseColor\", \"Color\", \"\", \"A\",{0},{1},{2}", m_Color.second[0], m_Color.second[1], m_Color.second[2]);
+                                mb.AppendFormat("\n\t\t\tP: \"DiffuseColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
+                                    m_Color.second[0], m_Color.second[1], m_Color.second[2]);
                                 break;
-                            case "_SpecularColor"://then what is _SpecColor??
-                                mb.AppendFormat("\n\t\t\tP: \"SpecularColor\", \"Color\", \"\", \"A\",{0},{1},{2}", m_Color.second[0], m_Color.second[1], m_Color.second[2]);
+                            case "_SpecularColor": //then what is _SpecColor??
+                                mb.AppendFormat("\n\t\t\tP: \"SpecularColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
+                                    m_Color.second[0], m_Color.second[1], m_Color.second[2]);
                                 break;
                             case "_ReflectColor":
-                                mb.AppendFormat("\n\t\t\tP: \"AmbientColor\", \"Color\", \"\", \"A\",{0},{1},{2}", m_Color.second[0], m_Color.second[1], m_Color.second[2]);
+                                mb.AppendFormat("\n\t\t\tP: \"AmbientColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
+                                    m_Color.second[0], m_Color.second[1], m_Color.second[2]);
                                 break;
                             default:
-                                mb.AppendFormat("\n;\t\t\tP: \"{3}\", \"Color\", \"\", \"A\",{0},{1},{2}", m_Color.second[0], m_Color.second[1], m_Color.second[2], m_Color.first);//commented out
+                                mb.AppendFormat("\n;\t\t\tP: \"{3}\", \"Color\", \"\", \"A\",{0},{1},{2}",
+                                    m_Color.second[0], m_Color.second[1], m_Color.second[2],
+                                    m_Color.first); //commented out
                                 break;
                         }
                     }
+
                     #endregion
 
                     #region write material parameters
+
                     foreach (StrFloatPair m_Float in m_Material.m_Floats)
                     {
                         switch (m_Float.first)
                         {
                             case "_Shininess":
-                                mb.AppendFormat("\n\t\t\tP: \"ShininessExponent\", \"Number\", \"\", \"A\",{0}", m_Float.second);
-                                mb.AppendFormat("\n\t\t\tP: \"Shininess\", \"Number\", \"\", \"A\",{0}", m_Float.second);
+                                mb.AppendFormat("\n\t\t\tP: \"ShininessExponent\", \"Number\", \"\", \"A\",{0}",
+                                    m_Float.second);
+                                mb.AppendFormat("\n\t\t\tP: \"Shininess\", \"Number\", \"\", \"A\",{0}",
+                                    m_Float.second);
                                 break;
                             case "_Transparency":
                                 mb.Append("\n\t\t\tP: \"TransparentColor\", \"Color\", \"\", \"A\",1,1,1");
-                                mb.AppendFormat("\n\t\t\tP: \"TransparencyFactor\", \"Number\", \"\", \"A\",{0}", m_Float.second);
-                                mb.AppendFormat("\n\t\t\tP: \"Opacity\", \"Number\", \"\", \"A\",{0}", (1 - m_Float.second));
+                                mb.AppendFormat("\n\t\t\tP: \"TransparencyFactor\", \"Number\", \"\", \"A\",{0}",
+                                    m_Float.second);
+                                mb.AppendFormat("\n\t\t\tP: \"Opacity\", \"Number\", \"\", \"A\",{0}",
+                                    1 - m_Float.second);
                                 break;
                             default:
-                                mb.AppendFormat("\n;\t\t\tP: \"{0}\", \"Number\", \"\", \"A\",{1}", m_Float.first, m_Float.second);
+                                mb.AppendFormat("\n;\t\t\tP: \"{0}\", \"Number\", \"\", \"A\",{1}",
+                                    m_Float.first, m_Float.second);
                                 break;
                         }
                     }
+
                     #endregion
 
                     //mb.Append("\n\t\t\tP: \"SpecularFactor\", \"Number\", \"\", \"A\",0");
@@ -1549,10 +1639,13 @@ namespace UnityStudio
                     mb.Append("\n\t}");
 
                     #region write texture connections
+
                     foreach (TexEnv m_TexEnv in m_Material.m_TexEnvs)
                     {
                         AssetPreloadData TexturePD;
+
                         #region get Porsche material from json
+
                         if (!assetsfileList.TryGetPD(m_TexEnv.m_Texture, out TexturePD) && jsonMats != null)
                         {
                             Dictionary<string, string> matProp;
@@ -1572,6 +1665,7 @@ namespace UnityStudio
                                 }
                             }
                         }
+
                         #endregion
 
                         if (TexturePD != null && TexturePD.Type2 == 28)
@@ -1604,13 +1698,17 @@ namespace UnityStudio
                             }
                         }
                     }
+
                     #endregion
                 }
+
                 #endregion
 
                 #region write generic FBX data after everything was collected
+
                 fbx.Append("; FBX 7.1.0 project file");
-                fbx.Append("\nFBXHeaderExtension:  {\n\tFBXHeaderVersion: 1003\n\tFBXVersion: 7100\n\tCreationTimeStamp:  {\n\t\tVersion: 1000");
+                fbx.Append(
+                    "\nFBXHeaderExtension:  {\n\tFBXHeaderVersion: 1003\n\tFBXVersion: 7100\n\tCreationTimeStamp:  {\n\t\tVersion: 1000");
                 fbx.Append("\n\t\tYear: " + timestamp.Year);
                 fbx.Append("\n\t\tMonth: " + timestamp.Month);
                 fbx.Append("\n\t\tDay: " + timestamp.Day);
@@ -1631,18 +1729,9 @@ namespace UnityStudio
                 fbx.Append("\n\t\tP: \"CoordAxisSign\", \"int\", \"Integer\", \"\",1");
                 fbx.Append("\n\t\tP: \"OriginalUpAxis\", \"int\", \"Integer\", \"\",1");
                 fbx.Append("\n\t\tP: \"OriginalUpAxisSign\", \"int\", \"Integer\", \"\",1");
-                fbx.AppendFormat("\n\t\tP: \"UnitScaleFactor\", \"double\", \"Number\", \"\",{0}", Properties.Settings.Default["scaleFactor"]);
+                fbx.AppendFormat("\n\t\tP: \"UnitScaleFactor\", \"double\", \"Number\", \"\",{0}",
+                    Properties.Settings.Default["scaleFactor"]);
                 fbx.Append("\n\t\tP: \"OriginalUnitScaleFactor\", \"double\", \"Number\", \"\",1.0");
-                //fbx.Append("\n\t\tP: \"AmbientColor\", \"ColorRGB\", \"Color\", \"\",0,0,0");
-                //fbx.Append("\n\t\tP: \"DefaultCamera\", \"KString\", \"\", \"\", \"Producer Perspective\"");
-                //fbx.Append("\n\t\tP: \"TimeMode\", \"enum\", \"\", \"\",6");
-                //fbx.Append("\n\t\tP: \"TimeProtocol\", \"enum\", \"\", \"\",2");
-                //fbx.Append("\n\t\tP: \"SnapOnFrameMode\", \"enum\", \"\", \"\",0");
-                //fbx.Append("\n\t\tP: \"TimeSpanStart\", \"KTime\", \"Time\", \"\",0");
-                //fbx.Append("\n\t\tP: \"TimeSpanStop\", \"KTime\", \"Time\", \"\",153953860000");
-                //fbx.Append("\n\t\tP: \"CustomFrameRate\", \"double\", \"Number\", \"\",-1");
-                //fbx.Append("\n\t\tP: \"TimeMarker\", \"Compound\", \"\", \"\"");
-                //fbx.Append("\n\t\tP: \"CurrentTimeMarker\", \"int\", \"Integer\", \"\",-1");
                 fbx.Append("\n\t}\n}\n");
 
                 fbx.Append("\nDocuments:  {");
@@ -1658,7 +1747,11 @@ namespace UnityStudio
 
                 fbx.Append("\nDefinitions:  {");
                 fbx.Append("\n\tVersion: 100");
-                fbx.AppendFormat("\n\tCount: {0}", 1 + 2 * GameObjects.Count + Materials.Count + 2 * Textures.Count + ((bool)Properties.Settings.Default["exportDeformers"] ? Skins.Count + DeformerCount + Skins.Count + 1 : 0));
+                fbx.AppendFormat("\n\tCount: {0}",
+                    1 + 2 * GameObjects.Count + Materials.Count + 2 * Textures.Count +
+                    ((bool) Properties.Settings.Default["exportDeformers"]
+                        ? Skins.Count + DeformerCount + Skins.Count + 1
+                        : 0));
 
                 fbx.Append("\n\tObjectType: \"GlobalSettings\" {");
                 fbx.Append("\n\t\tCount: 1");
@@ -1693,7 +1786,7 @@ namespace UnityStudio
                 fbx.AppendFormat("\n\t\tCount: {0}", Textures.Count);
                 fbx.Append("\n\t}");
 
-                if ((bool)Properties.Settings.Default["exportDeformers"])
+                if ((bool) Properties.Settings.Default["exportDeformers"])
                 {
                     fbx.Append("\n\tObjectType: \"CollectionExclusive\" {");
                     fbx.AppendFormat("\n\t\tCount: {0}", Skins.Count);
@@ -1721,29 +1814,36 @@ namespace UnityStudio
 
                 FBXwriter.Write(fbx);
                 fbx.Clear();
+
                 #endregion
 
                 #region write Model nodes and connections
+
                 StatusStripUpdate("Writing Nodes and hierarchy");
                 foreach (GameObject m_GameObject in GameObjects)
                 {
                     if (m_GameObject.m_MeshFilter == null && m_GameObject.m_SkinnedMeshRenderer == null)
                     {
-                        if ((bool)Properties.Settings.Default["exportDeformers"] && (bool)Properties.Settings.Default["convertDummies"] && LimbNodes.Contains(m_GameObject))
+                        if ((bool) Properties.Settings.Default["exportDeformers"] &&
+                            (bool) Properties.Settings.Default["convertDummies"] && LimbNodes.Contains(m_GameObject))
                         {
-                            ob.AppendFormat("\n\tNodeAttribute: 2{0}, \"NodeAttribute::\", \"LimbNode\" {{", m_GameObject.uniqueID);
+                            ob.AppendFormat("\n\tNodeAttribute: 2{0}, \"NodeAttribute::\", \"LimbNode\" {{",
+                                m_GameObject.uniqueID);
                             ob.Append("\n\t\tTypeFlags: \"Skeleton\"");
                             ob.Append("\n\t}");
 
-                            ob.AppendFormat("\n\tModel: 1{0}, \"Model::{1}\", \"LimbNode\" {{", m_GameObject.uniqueID, m_GameObject.m_Name);
+                            ob.AppendFormat("\n\tModel: 1{0}, \"Model::{1}\", \"LimbNode\" {{", m_GameObject.uniqueID,
+                                m_GameObject.m_Name);
                         }
                         else
                         {
-                            ob.AppendFormat("\n\tNodeAttribute: 2{0}, \"NodeAttribute::\", \"Null\" {{", m_GameObject.uniqueID);
+                            ob.AppendFormat("\n\tNodeAttribute: 2{0}, \"NodeAttribute::\", \"Null\" {{",
+                                m_GameObject.uniqueID);
                             ob.Append("\n\t\tTypeFlags: \"Null\"");
                             ob.Append("\n\t}");
 
-                            ob.AppendFormat("\n\tModel: 1{0}, \"Model::{1}\", \"Null\" {{", m_GameObject.uniqueID, m_GameObject.m_Name);
+                            ob.AppendFormat("\n\tModel: 1{0}, \"Model::{1}\", \"Null\" {{", m_GameObject.uniqueID,
+                                m_GameObject.m_Name);
                         }
 
                         //connect NodeAttribute to Model
@@ -1752,7 +1852,8 @@ namespace UnityStudio
                     }
                     else
                     {
-                        ob.AppendFormat("\n\tModel: 1{0}, \"Model::{1}\", \"Mesh\" {{", m_GameObject.uniqueID, m_GameObject.m_Name);
+                        ob.AppendFormat("\n\tModel: 1{0}, \"Model::{1}\", \"Mesh\" {{", m_GameObject.uniqueID,
+                            m_GameObject.m_Name);
                     }
 
                     ob.Append("\n\t\tVersion: 232");
@@ -1764,11 +1865,20 @@ namespace UnityStudio
                     Transform m_Transform;
                     if (assetsfileList.TryGetTransform(m_GameObject.m_Transform, out m_Transform))
                     {
-                        float[] m_EulerRotation = QuatToEuler(new float[] { m_Transform.m_LocalRotation[0], -m_Transform.m_LocalRotation[1], -m_Transform.m_LocalRotation[2], m_Transform.m_LocalRotation[3] });
+                        float[] m_EulerRotation = QuatToEuler(new []
+                        {
+                            m_Transform.m_LocalRotation[0], -m_Transform.m_LocalRotation[1],
+                            -m_Transform.m_LocalRotation[2], m_Transform.m_LocalRotation[3]
+                        });
 
-                        ob.AppendFormat("\n\t\t\tP: \"Lcl Translation\", \"Lcl Translation\", \"\", \"A\",{0},{1},{2}", -m_Transform.m_LocalPosition[0], m_Transform.m_LocalPosition[1], m_Transform.m_LocalPosition[2]);
-                        ob.AppendFormat("\n\t\t\tP: \"Lcl Rotation\", \"Lcl Rotation\", \"\", \"A\",{0},{1},{2}", m_EulerRotation[0], m_EulerRotation[1], m_EulerRotation[2]);//handedness is switched in quat
-                        ob.AppendFormat("\n\t\t\tP: \"Lcl Scaling\", \"Lcl Scaling\", \"\", \"A\",{0},{1},{2}", m_Transform.m_LocalScale[0], m_Transform.m_LocalScale[1], m_Transform.m_LocalScale[2]);
+                        ob.AppendFormat("\n\t\t\tP: \"Lcl Translation\", \"Lcl Translation\", \"\", \"A\",{0},{1},{2}",
+                            -m_Transform.m_LocalPosition[0], m_Transform.m_LocalPosition[1],
+                            m_Transform.m_LocalPosition[2]);
+                        ob.AppendFormat("\n\t\t\tP: \"Lcl Rotation\", \"Lcl Rotation\", \"\", \"A\",{0},{1},{2}",
+                            m_EulerRotation[0], m_EulerRotation[1],
+                            m_EulerRotation[2]); //handedness is switched in quat
+                        ob.AppendFormat("\n\t\t\tP: \"Lcl Scaling\", \"Lcl Scaling\", \"\", \"A\",{0},{1},{2}",
+                            m_Transform.m_LocalScale[0], m_Transform.m_LocalScale[1], m_Transform.m_LocalScale[2]);
                     }
 
                     //mb.Append("\n\t\t\tP: \"UDP3DSMAX\", \"KString\", \"\", \"U\", \"MapChannel:1 = UVChannel_1&cr;&lf;MapChannel:2 = UVChannel_2&cr;&lf;\"");
@@ -1778,7 +1888,7 @@ namespace UnityStudio
                     ob.Append("\n\t\tCulling: \"CullingOff\"\n\t}");
 
                     //connect Model to parent
-                    GameObject parentObject = (GameObject)m_GameObject.Parent;
+                    GameObject parentObject = (GameObject) m_GameObject.Parent;
                     if (GameObjects.Contains(parentObject))
                     {
                         cb.AppendFormat("\n\n\t;Model::{0}, Model::{1}", m_GameObject.m_Name, parentObject.m_Name);
@@ -1789,12 +1899,12 @@ namespace UnityStudio
                         cb.AppendFormat("\n\n\t;Model::{0}, Model::RootNode", m_GameObject.m_Name);
                         cb.AppendFormat("\n\tC: \"OO\",1{0},0", m_GameObject.uniqueID);
                     }
-
-
                 }
+
                 #endregion
 
                 #region write non-skinnned Geometry
+
                 StatusStripUpdate("Writing Geometry");
                 foreach (AssetPreloadData MeshPD in Meshes)
                 {
@@ -1802,12 +1912,17 @@ namespace UnityStudio
                     MeshFBX(m_Mesh, MeshPD.uniqueID, ob);
 
                     //write data 8MB at a time
-                    if (ob.Length > (8 * 0x100000))
-                    { FBXwriter.Write(ob); ob.Clear(); }
+                    if (ob.Length > 8 * 0x100000)
+                    {
+                        FBXwriter.Write(ob);
+                        ob.Clear();
+                    }
                 }
+
                 #endregion
 
                 #region write Deformer objects and skinned Geometry
+
                 StringBuilder pb = new StringBuilder();
                 //generate unique ID for BindPose
                 pb.Append("\n\tPose: 5123456789, \"Pose::BIND_POSES\", \"BindPose\" {");
@@ -1821,159 +1936,156 @@ namespace UnityStudio
 
                     GameObject m_GameObject;
                     AssetPreloadData MeshPD;
-                    if (assetsfileList.TryGetGameObject(m_SkinnedMeshRenderer.m_GameObject, out m_GameObject) && assetsfileList.TryGetPD(m_SkinnedMeshRenderer.m_Mesh, out MeshPD))
+                    if (!assetsfileList.TryGetGameObject(m_SkinnedMeshRenderer.m_GameObject, out m_GameObject) ||
+                        !assetsfileList.TryGetPD(m_SkinnedMeshRenderer.m_Mesh, out MeshPD))
+                        continue;
+                    // generate unique Geometry ID for instanced mesh objects
+                    string keepID = MeshPD.uniqueID;
+                    MeshPD.uniqueID = SkinnedMeshPD.uniqueID;
+                    Mesh m_Mesh = new Mesh(MeshPD);
+                    MeshFBX(m_Mesh, MeshPD.uniqueID, ob);
+
+                    //write data 8MB at a time
+                    if (ob.Length > 8 * 0x100000)
                     {
-                        //generate unique Geometry ID for instanced mesh objects
-                        //instanced skinned geometry is possible in FBX, but all instances are linked to the same skeleton nodes
-                        //TODO: create instances if deformer option is not selected
-                        //find a way to test if a mesh instance was loaded previously and if it uses the same skeleton, then create instance or copy
-                        string keepID = MeshPD.uniqueID;
-                        MeshPD.uniqueID = SkinnedMeshPD.uniqueID;
-                        Mesh m_Mesh = new Mesh(MeshPD);
-                        MeshFBX(m_Mesh, MeshPD.uniqueID, ob);
+                        FBXwriter.Write(ob);
+                        ob.Clear();
+                    }
 
-                        //write data 8MB at a time
-                        if (ob.Length > (8 * 0x100000))
-                        { FBXwriter.Write(ob); ob.Clear(); }
+                    cb2.AppendFormat("\n\n\t;Geometry::, Model::{0}", m_GameObject.m_Name);
+                    cb2.AppendFormat("\n\tC: \"OO\",3{0},1{1}", MeshPD.uniqueID, m_GameObject.uniqueID);
 
-                        cb2.AppendFormat("\n\n\t;Geometry::, Model::{0}", m_GameObject.m_Name);
-                        cb2.AppendFormat("\n\tC: \"OO\",3{0},1{1}", MeshPD.uniqueID, m_GameObject.uniqueID);
+                    if (!(bool) Properties.Settings.Default["exportDeformers"])
+                    {
+                        MeshPD.uniqueID = keepID;
+                        continue;
+                    }
 
-                        if ((bool)Properties.Settings.Default["exportDeformers"])
+                    //add BindPose node
+                    pb.Append("\n\t\tPoseNode:  {");
+                    pb.AppendFormat("\n\t\t\tNode: 1{0}", m_GameObject.uniqueID);
+                    //pb.Append("\n\t\t\tMatrix: *16 {");
+                    //pb.Append("\n\t\t\t\ta: ");
+                    //pb.Append("\n\t\t\t} ");
+                    pb.Append("\n\t\t}");
+
+                    ob.AppendFormat("\n\tCollectionExclusive: 5{0}, \"DisplayLayer::{1}\", \"DisplayLayer\" {{",
+                        SkinnedMeshPD.uniqueID, m_GameObject.m_Name);
+                    ob.Append("\n\t\tProperties70:  {");
+                    ob.Append("\n\t\t}");
+                    ob.Append("\n\t}");
+
+                    //connect Model to DisplayLayer
+                    cb2.AppendFormat("\n\n\t;Model::{0}, DisplayLayer::", m_GameObject.m_Name);
+                    cb2.AppendFormat("\n\tC: \"OO\",1{0},5{1}", m_GameObject.uniqueID, SkinnedMeshPD.uniqueID);
+
+                    //write Deformers
+                    if (m_Mesh.m_Skin.Length <= 0 ||
+                        m_Mesh.m_BindPose.Length < m_SkinnedMeshRenderer.m_Bones.Length)
+                        continue;
+
+                    //write main Skin Deformer
+                    ob.AppendFormat("\n\tDeformer: 4{0}, \"Deformer::\", \"Skin\" {{", SkinnedMeshPD.uniqueID);
+                    ob.Append("\n\t\tVersion: 101");
+                    ob.Append("\n\t\tLink_DeformAcuracy: 50");
+                    ob.Append("\n\t}"); //Deformer end
+
+                    //connect Skin Deformer to Geometry
+                    cb2.Append("\n\n\t;Deformer::, Geometry::");
+                    cb2.AppendFormat("\n\tC: \"OO\",4{0},3{1}", SkinnedMeshPD.uniqueID, MeshPD.uniqueID);
+
+                    for (int b = 0; b < m_SkinnedMeshRenderer.m_Bones.Length; b++)
+                    {
+                        Transform m_Transform;
+                        if (assetsfileList.TryGetTransform(m_SkinnedMeshRenderer.m_Bones[b],
+                            out m_Transform))
                         {
-                            //add BindPose node
-                            pb.Append("\n\t\tPoseNode:  {");
-                            pb.AppendFormat("\n\t\t\tNode: 1{0}", m_GameObject.uniqueID);
-                            //pb.Append("\n\t\t\tMatrix: *16 {");
-                            //pb.Append("\n\t\t\t\ta: ");
-                            //pb.Append("\n\t\t\t} ");
-                            pb.Append("\n\t\t}");
-
-                            ob.AppendFormat("\n\tCollectionExclusive: 5{0}, \"DisplayLayer::{1}\", \"DisplayLayer\" {{", SkinnedMeshPD.uniqueID, m_GameObject.m_Name);
-                            ob.Append("\n\t\tProperties70:  {");
-                            ob.Append("\n\t\t}");
-                            ob.Append("\n\t}");
-
-                            //connect Model to DisplayLayer
-                            cb2.AppendFormat("\n\n\t;Model::{0}, DisplayLayer::", m_GameObject.m_Name);
-                            cb2.AppendFormat("\n\tC: \"OO\",1{0},5{1}", m_GameObject.uniqueID, SkinnedMeshPD.uniqueID);
-
-                            //write Deformers
-                            if (m_Mesh.m_Skin.Length > 0 && m_Mesh.m_BindPose.Length >= m_SkinnedMeshRenderer.m_Bones.Length)
+                            GameObject m_Bone;
+                            if (assetsfileList.TryGetGameObject(m_Transform.m_GameObject, out m_Bone))
                             {
-                                //write main Skin Deformer
-                                ob.AppendFormat("\n\tDeformer: 4{0}, \"Deformer::\", \"Skin\" {{", SkinnedMeshPD.uniqueID);
-                                ob.Append("\n\t\tVersion: 101");
-                                ob.Append("\n\t\tLink_DeformAcuracy: 50");
-                                ob.Append("\n\t}"); //Deformer end
+                                int influences = 0, ibSplit = 0, wbSplit = 0;
+                                StringBuilder ib = new StringBuilder(); //indices (vertex)
+                                StringBuilder wb = new StringBuilder(); //weights
 
-                                //connect Skin Deformer to Geometry
-                                cb2.Append("\n\n\t;Deformer::, Geometry::");
-                                cb2.AppendFormat("\n\tC: \"OO\",4{0},3{1}", SkinnedMeshPD.uniqueID, MeshPD.uniqueID);
-
-                                for (int b = 0; b < m_SkinnedMeshRenderer.m_Bones.Length; b++)
+                                for (int index = 0; index < m_Mesh.m_Skin.Length; index++)
                                 {
-                                    Transform m_Transform;
-                                    if (assetsfileList.TryGetTransform(m_SkinnedMeshRenderer.m_Bones[b], out m_Transform))
+                                    //if all weights (and indicces) are 0, bone0 has full control
+                                    if (Math.Abs(m_Mesh.m_Skin[index][0].weight) < 1e-4 &&
+                                        m_Mesh.m_Skin[index].All(x => Math.Abs(x.weight) < 1e-4) ||
+                                        m_Mesh.m_Skin[index][1].weight > 0)
                                     {
-                                        GameObject m_Bone;
-                                        if (assetsfileList.TryGetGameObject(m_Transform.m_GameObject, out m_Bone))
+                                        // this implies a second bone exists, so bone0 has control too
+                                        // (otherwise it wouldn't be the first in the series)
+                                        m_Mesh.m_Skin[index][0].weight = 1;
+                                    }
+
+                                    Mesh.BoneInfluence influence = m_Mesh.m_Skin[index]
+                                        .Find(x => x.boneIndex == b && x.weight > 0);
+                                    if (influence != null)
+                                    {
+                                        influences++;
+                                        ib.AppendFormat("{0},", index);
+                                        wb.AppendFormat("{0},", influence.weight);
+
+                                        if (ib.Length - ibSplit > 2000)
                                         {
-                                            int influences = 0, ibSplit = 0, wbSplit = 0;
-                                            StringBuilder ib = new StringBuilder();//indices (vertex)
-                                            StringBuilder wb = new StringBuilder();//weights
-
-                                            for (int index = 0; index < m_Mesh.m_Skin.Length; index++)
-                                            {
-                                                if (m_Mesh.m_Skin[index][0].weight == 0 && (m_Mesh.m_Skin[index].All(x => x.weight == 0) || //if all weights (and indicces) are 0, bone0 has full control
-                                                                                             m_Mesh.m_Skin[index][1].weight > 0)) //this implies a second bone exists, so bone0 has control too (otherwise it wouldn't be the first in the series)
-                                                { m_Mesh.m_Skin[index][0].weight = 1; }
-
-                                                Mesh.BoneInfluence influence = m_Mesh.m_Skin[index].Find(x => x.boneIndex == b && x.weight > 0);
-                                                if (influence != null)
-                                                {
-                                                    influences++;
-                                                    ib.AppendFormat("{0},", index);
-                                                    wb.AppendFormat("{0},", influence.weight);
-
-                                                    if (ib.Length - ibSplit > 2000) { ib.Append("\n"); ibSplit = ib.Length; }
-                                                    if (wb.Length - wbSplit > 2000) { wb.Append("\n"); wbSplit = wb.Length; }
-                                                }
-
-                                                /*float weight;
-                                                if (m_Mesh.m_Skin[index].TryGetValue(b, out weight))
-                                                {
-                                                    if (weight > 0)
-                                                    {
-                                                        influences++;
-                                                        ib.AppendFormat("{0},", index);
-                                                        wb.AppendFormat("{0},", weight);
-                                                    }
-                                                    else if (m_Mesh.m_Skin[index].Keys.Count == 1)//m_Mesh.m_Skin[index].Values.All(x => x == 0)
-                                                    {
-                                                        influences++;
-                                                        ib.AppendFormat("{0},", index);
-                                                        wb.AppendFormat("{0},", 1);
-                                                    }
-
-                                                    if (ib.Length - ibSplit > 2000) { ib.Append("\n"); ibSplit = ib.Length; }
-                                                    if (wb.Length - wbSplit > 2000) { wb.Append("\n"); wbSplit = wb.Length; }
-                                                }*/
-                                            }
-                                            if (influences > 0)
-                                            {
-                                                ib.Length--;//remove last comma
-                                                wb.Length--;//remove last comma
-                                            }
-
-                                            //SubDeformer objects need unique IDs because 2 or more deformers can be linked to the same bone
-                                            ob.AppendFormat("\n\tDeformer: 4{0}{1}, \"SubDeformer::\", \"Cluster\" {{", b, SkinnedMeshPD.uniqueID);
-                                            ob.Append("\n\t\tVersion: 100");
-                                            ob.Append("\n\t\tUserData: \"\", \"\"");
-
-                                            ob.AppendFormat("\n\t\tIndexes: *{0} {{\n\t\t\ta: ", influences);
-                                            ob.Append(ib);
-                                            ob.Append("\n\t\t}");
-                                            ib.Clear();
-
-                                            ob.AppendFormat("\n\t\tWeights: *{0} {{\n\t\t\ta: ", influences);
-                                            ob.Append(wb);
-                                            ob.Append("\n\t\t}");
-                                            wb.Clear();
-
-                                            ob.Append("\n\t\tTransform: *16 {\n\t\t\ta: ");
-                                            //ob.Append(string.Join(",", m_Mesh.m_BindPose[b]));
-                                            float[,] m = m_Mesh.m_BindPose[b];
-                                            ob.AppendFormat("{0},{1},{2},{3},", m[0, 0], -m[1, 0], -m[2, 0], m[3, 0]);
-                                            ob.AppendFormat("{0},{1},{2},{3},", -m[0, 1], m[1, 1], m[2, 1], m[3, 1]);
-                                            ob.AppendFormat("{0},{1},{2},{3},", -m[0, 2], m[1, 2], m[2, 2], m[3, 2]);
-                                            ob.AppendFormat("{0},{1},{2},{3},", -m[0, 3], m[1, 3], m[2, 3], m[3, 3]);
-                                            ob.Append("\n\t\t}");
-
-                                            ob.Append("\n\t}"); //SubDeformer end
-
-                                            //connect SubDeformer to Skin Deformer
-                                            cb2.Append("\n\n\t;SubDeformer::, Deformer::");
-                                            cb2.AppendFormat("\n\tC: \"OO\",4{0}{1},4{1}", b, SkinnedMeshPD.uniqueID);
-
-                                            //connect dummy Model to SubDeformer
-                                            cb2.AppendFormat("\n\n\t;Model::{0}, SubDeformer::", m_Bone.m_Name);
-                                            cb2.AppendFormat("\n\tC: \"OO\",1{0},4{1}{2}", m_Bone.uniqueID, b, SkinnedMeshPD.uniqueID);
+                                            ib.Append("\n");
+                                            ibSplit = ib.Length;
+                                        }
+                                        if (wb.Length - wbSplit > 2000)
+                                        {
+                                            wb.Append("\n");
+                                            wbSplit = wb.Length;
                                         }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                bool stop = true;
+                                if (influences > 0)
+                                {
+                                    ib.Length--; //remove last comma
+                                    wb.Length--; //remove last comma
+                                }
+
+                                //SubDeformer objects need unique IDs because 2 or more deformers can be linked to the same bone
+                                ob.AppendFormat("\n\tDeformer: 4{0}{1}, \"SubDeformer::\", \"Cluster\" {{",
+                                    b, SkinnedMeshPD.uniqueID);
+                                ob.Append("\n\t\tVersion: 100");
+                                ob.Append("\n\t\tUserData: \"\", \"\"");
+
+                                ob.AppendFormat("\n\t\tIndexes: *{0} {{\n\t\t\ta: ", influences);
+                                ob.Append(ib);
+                                ob.Append("\n\t\t}");
+                                ib.Clear();
+
+                                ob.AppendFormat("\n\t\tWeights: *{0} {{\n\t\t\ta: ", influences);
+                                ob.Append(wb);
+                                ob.Append("\n\t\t}");
+                                wb.Clear();
+
+                                ob.Append("\n\t\tTransform: *16 {\n\t\t\ta: ");
+                                //ob.Append(string.Join(",", m_Mesh.m_BindPose[b]));
+                                float[,] m = m_Mesh.m_BindPose[b];
+                                ob.AppendFormat("{0},{1},{2},{3},", m[0, 0], -m[1, 0], -m[2, 0], m[3, 0]);
+                                ob.AppendFormat("{0},{1},{2},{3},", -m[0, 1], m[1, 1], m[2, 1], m[3, 1]);
+                                ob.AppendFormat("{0},{1},{2},{3},", -m[0, 2], m[1, 2], m[2, 2], m[3, 2]);
+                                ob.AppendFormat("{0},{1},{2},{3},", -m[0, 3], m[1, 3], m[2, 3], m[3, 3]);
+                                ob.Append("\n\t\t}");
+
+                                ob.Append("\n\t}"); //SubDeformer end
+
+                                //connect SubDeformer to Skin Deformer
+                                cb2.Append("\n\n\t;SubDeformer::, Deformer::");
+                                cb2.AppendFormat("\n\tC: \"OO\",4{0}{1},4{1}", b, SkinnedMeshPD.uniqueID);
+
+                                //connect dummy Model to SubDeformer
+                                cb2.AppendFormat("\n\n\t;Model::{0}, SubDeformer::", m_Bone.m_Name);
+                                cb2.AppendFormat("\n\tC: \"OO\",1{0},4{1}{2}", m_Bone.uniqueID, b,
+                                    SkinnedMeshPD.uniqueID);
                             }
                         }
-
-                        MeshPD.uniqueID = keepID;
                     }
                 }
 
-                if ((bool)Properties.Settings.Default["exportDeformers"])
+                if ((bool) Properties.Settings.Default["exportDeformers"])
                 {
                     foreach (GameObject m_Bone in LimbNodes)
                     {
@@ -1986,14 +2098,19 @@ namespace UnityStudio
                         pb.Append("\n\t\t}");
                     }
                     pb.Append("\n\t}"); //BindPose end
-                    ob.Append(pb); pb.Clear();
+                    ob.Append(pb);
+                    pb.Clear();
                 }
+
                 #endregion
 
-                ob.Append(mb); mb.Clear();
-                cb.Append(cb2); cb2.Clear();
+                ob.Append(mb);
+                mb.Clear();
+                cb.Append(cb2);
+                cb2.Clear();
 
                 #region write & extract Textures
+
                 Directory.CreateDirectory(Path.GetDirectoryName(FBXfile) + "\\Texture2D");
 
                 foreach (AssetPreloadData TexturePD in Textures)
@@ -2002,7 +2119,10 @@ namespace UnityStudio
 
                     //TODO check texture type and set path accordingly; eg. CubeMap, Texture3D
                     string texFilename = Path.GetDirectoryName(FBXfile) + "\\Texture2D\\" + TexturePD.Text;
-                    if (uniqueNames.Checked) { texFilename += " #" + TexturePD.uniqueID; }
+                    if (uniqueNames.Checked)
+                    {
+                        texFilename += " #" + TexturePD.uniqueID;
+                    }
                     texFilename += TexturePD.extension;
 
                     if (File.Exists(texFilename))
@@ -2041,12 +2161,13 @@ namespace UnityStudio
                     cb.AppendFormat("\n\n\t;Video::{0}, Texture::{0}", TexturePD.Text);
                     cb.AppendFormat("\n\tC: \"OO\",8{0},7{1}", TexturePD.uniqueID, TexturePD.uniqueID);
                 }
+
                 #endregion
 
                 FBXwriter.Write(ob);
                 ob.Clear();
 
-                cb.Append("\n}");//Connections end
+                cb.Append("\n}"); //Connections end
                 FBXwriter.Write(cb);
                 cb.Clear();
 
@@ -2056,27 +2177,33 @@ namespace UnityStudio
 
         private void MeshFBX(Mesh m_Mesh, string MeshID, StringBuilder ob)
         {
-            if (m_Mesh.m_VertexCount > 0)//general failsafe
+            if (m_Mesh.m_VertexCount > 0) //general failsafe
             {
                 StatusStripUpdate("Writing Geometry: " + m_Mesh.m_Name);
 
                 ob.AppendFormat("\n\tGeometry: 3{0}, \"Geometry::\", \"Mesh\" {{", MeshID);
                 ob.Append("\n\t\tProperties70:  {");
                 byte[] randomColor = RandomColorGenerator(m_Mesh.m_Name);
-                ob.AppendFormat("\n\t\t\tP: \"Color\", \"ColorRGB\", \"Color\", \"\",{0},{1},{2}", ((float)randomColor[0] / 255), ((float)randomColor[1] / 255), ((float)randomColor[2] / 255));
+                ob.AppendFormat("\n\t\t\tP: \"Color\", \"ColorRGB\", \"Color\", \"\",{0},{1},{2}",
+                    ((float) randomColor[0] / 255), ((float) randomColor[1] / 255), ((float) randomColor[2] / 255));
                 ob.Append("\n\t\t}");
 
                 #region Vertices
+
                 ob.AppendFormat("\n\t\tVertices: *{0} {{\n\t\t\ta: ", m_Mesh.m_VertexCount * 3);
 
-                int c = 3;//vertex components
-                          //skip last component in vector4
-                if (m_Mesh.m_Vertices.Length == m_Mesh.m_VertexCount * 4) { c++; } //haha
+                int c = 3; //vertex components
+                //skip last component in vector4
+                if (m_Mesh.m_Vertices.Length == m_Mesh.m_VertexCount * 4)
+                {
+                    c++;
+                } //haha
 
                 int lineSplit = ob.Length;
                 for (int v = 0; v < m_Mesh.m_VertexCount; v++)
                 {
-                    ob.AppendFormat("{0},{1},{2},", -m_Mesh.m_Vertices[v * c], m_Mesh.m_Vertices[v * c + 1], m_Mesh.m_Vertices[v * c + 2]);
+                    ob.AppendFormat("{0},{1},{2},", -m_Mesh.m_Vertices[v * c], m_Mesh.m_Vertices[v * c + 1],
+                        m_Mesh.m_Vertices[v * c + 2]);
 
                     if (ob.Length - lineSplit > 2000)
                     {
@@ -2084,18 +2211,21 @@ namespace UnityStudio
                         lineSplit = ob.Length;
                     }
                 }
-                ob.Length--;//remove last comma
+                ob.Length--; //remove last comma
                 ob.Append("\n\t\t}");
+
                 #endregion
 
                 #region Indices
+
                 //in order to test topology for triangles/quads we need to store submeshes and write each one as geometry, then link to Mesh Node
                 ob.AppendFormat("\n\t\tPolygonVertexIndex: *{0} {{\n\t\t\ta: ", m_Mesh.m_Indices.Count);
 
                 lineSplit = ob.Length;
                 for (int f = 0; f < m_Mesh.m_Indices.Count / 3; f++)
                 {
-                    ob.AppendFormat("{0},{1},{2},", m_Mesh.m_Indices[f * 3], m_Mesh.m_Indices[f * 3 + 2], (-m_Mesh.m_Indices[f * 3 + 1] - 1));
+                    ob.AppendFormat("{0},{1},{2},", m_Mesh.m_Indices[f * 3], m_Mesh.m_Indices[f * 3 + 2],
+                        (-m_Mesh.m_Indices[f * 3 + 1] - 1));
 
                     if (ob.Length - lineSplit > 2000)
                     {
@@ -2103,14 +2233,17 @@ namespace UnityStudio
                         lineSplit = ob.Length;
                     }
                 }
-                ob.Length--;//remove last comma
+                ob.Length--; //remove last comma
 
                 ob.Append("\n\t\t}");
                 ob.Append("\n\t\tGeometryVersion: 124");
+
                 #endregion
 
                 #region Normals
-                if ((bool)Properties.Settings.Default["exportNormals"] && m_Mesh.m_Normals != null && m_Mesh.m_Normals.Length > 0)
+
+                if ((bool) Properties.Settings.Default["exportNormals"] && m_Mesh.m_Normals != null &&
+                    m_Mesh.m_Normals.Length > 0)
                 {
                     ob.Append("\n\t\tLayerElementNormal: 0 {");
                     ob.Append("\n\t\t\tVersion: 101");
@@ -2119,13 +2252,20 @@ namespace UnityStudio
                     ob.Append("\n\t\t\tReferenceInformationType: \"Direct\"");
                     ob.AppendFormat("\n\t\t\tNormals: *{0} {{\n\t\t\ta: ", (m_Mesh.m_VertexCount * 3));
 
-                    if (m_Mesh.m_Normals.Length == m_Mesh.m_VertexCount * 3) { c = 3; }
-                    else if (m_Mesh.m_Normals.Length == m_Mesh.m_VertexCount * 4) { c = 4; }
+                    if (m_Mesh.m_Normals.Length == m_Mesh.m_VertexCount * 3)
+                    {
+                        c = 3;
+                    }
+                    else if (m_Mesh.m_Normals.Length == m_Mesh.m_VertexCount * 4)
+                    {
+                        c = 4;
+                    }
 
                     lineSplit = ob.Length;
                     for (int v = 0; v < m_Mesh.m_VertexCount; v++)
                     {
-                        ob.AppendFormat("{0},{1},{2},", -m_Mesh.m_Normals[v * c], m_Mesh.m_Normals[v * c + 1], m_Mesh.m_Normals[v * c + 2]);
+                        ob.AppendFormat("{0},{1},{2},", -m_Mesh.m_Normals[v * c], m_Mesh.m_Normals[v * c + 1],
+                            m_Mesh.m_Normals[v * c + 2]);
 
                         if (ob.Length - lineSplit > 2000)
                         {
@@ -2133,13 +2273,16 @@ namespace UnityStudio
                             lineSplit = ob.Length;
                         }
                     }
-                    ob.Length--;//remove last comma
+                    ob.Length--; //remove last comma
                     ob.Append("\n\t\t\t}\n\t\t}");
                 }
+
                 #endregion
 
                 #region Tangents
-                if ((bool)Properties.Settings.Default["exportTangents"] && m_Mesh.m_Tangents != null && m_Mesh.m_Tangents.Length > 0)
+
+                if ((bool) Properties.Settings.Default["exportTangents"] && m_Mesh.m_Tangents != null &&
+                    m_Mesh.m_Tangents.Length > 0)
                 {
                     ob.Append("\n\t\tLayerElementTangent: 0 {");
                     ob.Append("\n\t\t\tVersion: 101");
@@ -2148,13 +2291,20 @@ namespace UnityStudio
                     ob.Append("\n\t\t\tReferenceInformationType: \"Direct\"");
                     ob.AppendFormat("\n\t\t\tTangents: *{0} {{\n\t\t\ta: ", (m_Mesh.m_VertexCount * 3));
 
-                    if (m_Mesh.m_Tangents.Length == m_Mesh.m_VertexCount * 3) { c = 3; }
-                    else if (m_Mesh.m_Tangents.Length == m_Mesh.m_VertexCount * 4) { c = 4; }
+                    if (m_Mesh.m_Tangents.Length == m_Mesh.m_VertexCount * 3)
+                    {
+                        c = 3;
+                    }
+                    else if (m_Mesh.m_Tangents.Length == m_Mesh.m_VertexCount * 4)
+                    {
+                        c = 4;
+                    }
 
                     lineSplit = ob.Length;
                     for (int v = 0; v < m_Mesh.m_VertexCount; v++)
                     {
-                        ob.AppendFormat("{0},{1},{2},", -m_Mesh.m_Tangents[v * c], m_Mesh.m_Tangents[v * c + 1], m_Mesh.m_Tangents[v * c + 2]);
+                        ob.AppendFormat("{0},{1},{2},", -m_Mesh.m_Tangents[v * c], m_Mesh.m_Tangents[v * c + 1],
+                            m_Mesh.m_Tangents[v * c + 2]);
 
                         if (ob.Length - lineSplit > 2000)
                         {
@@ -2162,14 +2312,16 @@ namespace UnityStudio
                             lineSplit = ob.Length;
                         }
                     }
-                    ob.Length--;//remove last comma
+                    ob.Length--; //remove last comma
                     ob.Append("\n\t\t\t}\n\t\t}");
                 }
+
                 #endregion
 
                 #region Colors
+
                 int channelCount = -1;
-                if ((bool)Properties.Settings.Default["exportColors"] && m_Mesh.m_Colors != null)
+                if ((bool) Properties.Settings.Default["exportColors"] && m_Mesh.m_Colors != null)
                 {
                     if (m_Mesh.m_Colors.Length == m_Mesh.m_VertexCount * 4)
                         channelCount = 4;
@@ -2203,11 +2355,13 @@ namespace UnityStudio
                         {
                             case 4:
                                 ob.AppendFormat("{0},{1},{2},{3},",
-                                    m_Mesh.m_Colors[offset + 0], m_Mesh.m_Colors[offset + 1], m_Mesh.m_Colors[offset + 2], m_Mesh.m_Colors[offset + 3]);
+                                    m_Mesh.m_Colors[offset + 0], m_Mesh.m_Colors[offset + 1],
+                                    m_Mesh.m_Colors[offset + 2], m_Mesh.m_Colors[offset + 3]);
                                 break;
                             case 3:
                                 ob.AppendFormat("{0},{1},{2},{3},",
-                                    m_Mesh.m_Colors[offset + 0], m_Mesh.m_Colors[offset + 1], m_Mesh.m_Colors[offset + 2], 1.0f);
+                                    m_Mesh.m_Colors[offset + 0], m_Mesh.m_Colors[offset + 1],
+                                    m_Mesh.m_Colors[offset + 2], 1.0f);
                                 break;
                             case 2:
                                 ob.AppendFormat("{0},{1},{2},{3},",
@@ -2224,9 +2378,8 @@ namespace UnityStudio
                             ob.Append("\n");
                             lineSplit = ob.Length;
                         }
-
                     }
-                    ob.Length--;//remove last comma
+                    ob.Length--; //remove last comma
 
                     ob.Append("\n\t\t\t}");
                     ob.AppendFormat("\n\t\t\tColorIndex: *{0} {{\n\t\t\ta: ", m_Mesh.m_Indices.Count);
@@ -2234,7 +2387,8 @@ namespace UnityStudio
                     lineSplit = ob.Length;
                     for (int f = 0; f < m_Mesh.m_Indices.Count / 3; f++)
                     {
-                        ob.AppendFormat("{0},{1},{2},", m_Mesh.m_Indices[f * 3], m_Mesh.m_Indices[f * 3 + 2], m_Mesh.m_Indices[f * 3 + 1]);
+                        ob.AppendFormat("{0},{1},{2},", m_Mesh.m_Indices[f * 3], m_Mesh.m_Indices[f * 3 + 2],
+                            m_Mesh.m_Indices[f * 3 + 1]);
 
                         if (ob.Length - lineSplit > 2000)
                         {
@@ -2242,15 +2396,17 @@ namespace UnityStudio
                             lineSplit = ob.Length;
                         }
                     }
-                    ob.Length--;//remove last comma
+                    ob.Length--; //remove last comma
 
                     ob.Append("\n\t\t\t}\n\t\t}");
                 }
+
                 #endregion
 
                 #region UV1
+
                 //does FBX support UVW coordinates?
-                if ((bool)Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV1 != null && m_Mesh.m_UV1.Length > 0)
+                if ((bool) Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV1 != null && m_Mesh.m_UV1.Length > 0)
                 {
                     ob.Append("\n\t\tLayerElementUV: 0 {");
                     ob.Append("\n\t\t\tVersion: 101");
@@ -2270,12 +2426,15 @@ namespace UnityStudio
                             lineSplit = ob.Length;
                         }
                     }
-                    ob.Length--;//remove last comma
+                    ob.Length--; //remove last comma
                     ob.Append("\n\t\t\t}\n\t\t}");
                 }
+
                 #endregion
+
                 #region UV2
-                if ((bool)Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV2 != null && m_Mesh.m_UV2.Length > 0)
+
+                if ((bool) Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV2 != null && m_Mesh.m_UV2.Length > 0)
                 {
                     ob.Append("\n\t\tLayerElementUV: 1 {");
                     ob.Append("\n\t\t\tVersion: 101");
@@ -2295,12 +2454,15 @@ namespace UnityStudio
                             lineSplit = ob.Length;
                         }
                     }
-                    ob.Length--;//remove last comma
+                    ob.Length--; //remove last comma
                     ob.Append("\n\t\t\t}\n\t\t}");
                 }
+
                 #endregion
+
                 #region UV3
-                if ((bool)Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV3 != null && m_Mesh.m_UV3.Length > 0)
+
+                if ((bool) Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV3 != null && m_Mesh.m_UV3.Length > 0)
                 {
                     ob.Append("\n\t\tLayerElementUV: 2 {");
                     ob.Append("\n\t\t\tVersion: 101");
@@ -2320,12 +2482,15 @@ namespace UnityStudio
                             lineSplit = ob.Length;
                         }
                     }
-                    ob.Length--;//remove last comma
+                    ob.Length--; //remove last comma
                     ob.Append("\n\t\t\t}\n\t\t}");
                 }
+
                 #endregion
+
                 #region UV4
-                if ((bool)Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV4 != null && m_Mesh.m_UV4.Length > 0)
+
+                if ((bool) Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV4 != null && m_Mesh.m_UV4.Length > 0)
                 {
                     ob.Append("\n\t\tLayerElementUV: 3 {");
                     ob.Append("\n\t\t\tVersion: 101");
@@ -2345,22 +2510,33 @@ namespace UnityStudio
                             lineSplit = ob.Length;
                         }
                     }
-                    ob.Length--;//remove last comma
+                    ob.Length--; //remove last comma
                     ob.Append("\n\t\t\t}\n\t\t}");
                 }
+
                 #endregion
 
                 #region Material
+
                 ob.Append("\n\t\tLayerElementMaterial: 0 {");
                 ob.Append("\n\t\t\tVersion: 101");
                 ob.Append("\n\t\t\tName: \"\"");
                 ob.Append("\n\t\t\tMappingInformationType: \"");
-                if (m_Mesh.m_SubMeshes.Count == 1) { ob.Append("AllSame\""); }
-                else { ob.Append("ByPolygon\""); }
+                if (m_Mesh.m_SubMeshes.Count == 1)
+                {
+                    ob.Append("AllSame\"");
+                }
+                else
+                {
+                    ob.Append("ByPolygon\"");
+                }
                 ob.Append("\n\t\t\tReferenceInformationType: \"IndexToDirect\"");
                 ob.AppendFormat("\n\t\t\tMaterials: *{0} {{", m_Mesh.m_materialIDs.Count);
                 ob.Append("\n\t\t\t\t");
-                if (m_Mesh.m_SubMeshes.Count == 1) { ob.Append("0"); }
+                if (m_Mesh.m_SubMeshes.Count == 1)
+                {
+                    ob.Append("0");
+                }
                 else
                 {
                     lineSplit = ob.Length;
@@ -2374,22 +2550,26 @@ namespace UnityStudio
                             lineSplit = ob.Length;
                         }
                     }
-                    ob.Length--;//remove last comma
+                    ob.Length--; //remove last comma
                 }
                 ob.Append("\n\t\t\t}\n\t\t}");
+
                 #endregion
 
                 #region Layers
+
                 ob.Append("\n\t\tLayer: 0 {");
                 ob.Append("\n\t\t\tVersion: 100");
-                if ((bool)Properties.Settings.Default["exportNormals"] && m_Mesh.m_Normals != null && m_Mesh.m_Normals.Length > 0)
+                if ((bool) Properties.Settings.Default["exportNormals"] && m_Mesh.m_Normals != null &&
+                    m_Mesh.m_Normals.Length > 0)
                 {
                     ob.Append("\n\t\t\tLayerElement:  {");
                     ob.Append("\n\t\t\t\tType: \"LayerElementNormal\"");
                     ob.Append("\n\t\t\t\tTypedIndex: 0");
                     ob.Append("\n\t\t\t}");
                 }
-                if ((bool)Properties.Settings.Default["exportTangents"] && m_Mesh.m_Tangents != null && m_Mesh.m_Tangents.Length > 0)
+                if ((bool) Properties.Settings.Default["exportTangents"] && m_Mesh.m_Tangents != null &&
+                    m_Mesh.m_Tangents.Length > 0)
                 {
                     ob.Append("\n\t\t\tLayerElement:  {");
                     ob.Append("\n\t\t\t\tType: \"LayerElementTangent\"");
@@ -2409,14 +2589,15 @@ namespace UnityStudio
                 ob.Append("\n\t\t\t\tType: \"LayerElementBumpTextures\"");
                 ob.Append("\n\t\t\t\tTypedIndex: 0");
                 ob.Append("\n\t\t\t}");*/
-                if ((bool)Properties.Settings.Default["exportColors"] && m_Mesh.m_Colors != null && m_Mesh.m_Colors.Length > 0)
+                if ((bool) Properties.Settings.Default["exportColors"] && m_Mesh.m_Colors != null &&
+                    m_Mesh.m_Colors.Length > 0)
                 {
                     ob.Append("\n\t\t\tLayerElement:  {");
                     ob.Append("\n\t\t\t\tType: \"LayerElementColor\"");
                     ob.Append("\n\t\t\t\tTypedIndex: 0");
                     ob.Append("\n\t\t\t}");
                 }
-                if ((bool)Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV1 != null && m_Mesh.m_UV1.Length > 0)
+                if ((bool) Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV1 != null && m_Mesh.m_UV1.Length > 0)
                 {
                     ob.Append("\n\t\t\tLayerElement:  {");
                     ob.Append("\n\t\t\t\tType: \"LayerElementUV\"");
@@ -2425,7 +2606,7 @@ namespace UnityStudio
                 }
                 ob.Append("\n\t\t}"); //Layer 0 end
 
-                if ((bool)Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV2 != null && m_Mesh.m_UV2.Length > 0)
+                if ((bool) Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV2 != null && m_Mesh.m_UV2.Length > 0)
                 {
                     ob.Append("\n\t\tLayer: 1 {");
                     ob.Append("\n\t\t\tVersion: 100");
@@ -2436,7 +2617,7 @@ namespace UnityStudio
                     ob.Append("\n\t\t}"); //Layer 1 end
                 }
 
-                if ((bool)Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV3 != null && m_Mesh.m_UV3.Length > 0)
+                if ((bool) Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV3 != null && m_Mesh.m_UV3.Length > 0)
                 {
                     ob.Append("\n\t\tLayer: 2 {");
                     ob.Append("\n\t\t\tVersion: 100");
@@ -2447,7 +2628,7 @@ namespace UnityStudio
                     ob.Append("\n\t\t}"); //Layer 2 end
                 }
 
-                if ((bool)Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV4 != null && m_Mesh.m_UV4.Length > 0)
+                if ((bool) Properties.Settings.Default["exportUVs"] && m_Mesh.m_UV4 != null && m_Mesh.m_UV4.Length > 0)
                 {
                     ob.Append("\n\t\tLayer: 3 {");
                     ob.Append("\n\t\t\tVersion: 100");
@@ -2457,6 +2638,7 @@ namespace UnityStudio
                     ob.Append("\n\t\t\t}");
                     ob.Append("\n\t\t}"); //Layer 3 end
                 }
+
                 #endregion
 
                 ob.Append("\n\t}"); //Geometry end
@@ -2469,11 +2651,13 @@ namespace UnityStudio
             {
                 string savePath = saveFolderDialog1.FileName;
                 if (Path.GetFileName(savePath) == "Select folder or write folder name to create")
-                { savePath = Path.GetDirectoryName(saveFolderDialog1.FileName); }
+                {
+                    savePath = Path.GetDirectoryName(saveFolderDialog1.FileName);
+                }
 
-                bool exportAll = ((ToolStripItem)sender).Name == "exportAllAssetsMenuItem";
-                bool exportFiltered = ((ToolStripItem)sender).Name == "exportFilteredAssetsMenuItem";
-                bool exportSelected = ((ToolStripItem)sender).Name == "exportSelectedAssetsMenuItem";
+                bool exportAll = ((ToolStripItem) sender).Name == "exportAllAssetsMenuItem";
+                bool exportFiltered = ((ToolStripItem) sender).Name == "exportFilteredAssetsMenuItem";
+                bool exportSelected = ((ToolStripItem) sender).Name == "exportSelectedAssetsMenuItem";
 
                 int toExport = 0;
                 int exportedCount = 0;
@@ -2483,16 +2667,25 @@ namespace UnityStudio
                 foreach (AssetsFile assetsFile in assetsfileList)
                 {
                     string exportpath = savePath + "\\";
-                    if (assetGroupOptions.SelectedIndex == 1) { exportpath += Path.GetFileNameWithoutExtension(assetsFile.filePath) + "_export\\"; }
+                    if (assetGroupOptions.SelectedIndex == 1)
+                    {
+                        exportpath += Path.GetFileNameWithoutExtension(assetsFile.filePath) + "_export\\";
+                    }
 
                     foreach (AssetPreloadData asset in assetsFile.exportableAssets)
                     {
                         if (exportAll ||
-                            visibleAssets.Exists(x => x.uniqueID == asset.uniqueID) && (exportFiltered || 
-                                                                                        exportSelected && asset.Index >= 0 && assetListView.SelectedIndices.Contains(asset.Index)))
+                            visibleAssets.Exists(x => x.uniqueID == asset.uniqueID) && (exportFiltered ||
+                                                                                        exportSelected &&
+                                                                                        asset.Index >= 0 &&
+                                                                                        assetListView.SelectedIndices
+                                                                                            .Contains(asset.Index)))
                         {
                             toExport++;
-                            if (assetGroupOptions.SelectedIndex == 0) { exportpath = savePath + "\\" + asset.TypeString + "\\"; }
+                            if (assetGroupOptions.SelectedIndex == 0)
+                            {
+                                exportpath = savePath + "\\" + asset.TypeString + "\\";
+                            }
 
                             //AudioClip and Texture2D extensions are set when the list is built
                             //so their overwrite tests can be done without loading them again
@@ -2501,25 +2694,42 @@ namespace UnityStudio
                             {
                                 case 28:
                                     if (!ExportFileExists(exportpath + asset.Text + asset.extension, asset.TypeString))
-                                    { ExportTexture(new Texture2D(asset, true), exportpath + asset.Text + asset.extension); exportedCount++; }
+                                    {
+                                        ExportTexture(new Texture2D(asset, true),
+                                            exportpath + asset.Text + asset.extension);
+                                        exportedCount++;
+                                    }
                                     break;
                                 case 83:
                                     if (!ExportFileExists(exportpath + asset.Text + asset.extension, asset.TypeString))
-                                    { ExportAudioClip(new AudioClip(asset, true), exportpath + asset.Text + asset.extension); exportedCount++; }
+                                    {
+                                        ExportAudioClip(new AudioClip(asset, true),
+                                            exportpath + asset.Text + asset.extension);
+                                        exportedCount++;
+                                    }
                                     break;
                                 case 48:
                                     if (!ExportFileExists(exportpath + asset.Text + ".txt", asset.TypeString))
-                                    { ExportText(new TextAsset(asset, true), exportpath + asset.Text + ".txt"); exportedCount++; }
+                                    {
+                                        ExportText(new TextAsset(asset, true), exportpath + asset.Text + ".txt");
+                                        exportedCount++;
+                                    }
                                     break;
                                 case 49:
                                     TextAsset m_TextAsset = new TextAsset(asset, true);
                                     if (!ExportFileExists(exportpath + asset.Text + asset.extension, asset.TypeString))
-                                    { ExportText(m_TextAsset, exportpath + asset.Text + asset.extension); exportedCount++; }
+                                    {
+                                        ExportText(m_TextAsset, exportpath + asset.Text + asset.extension);
+                                        exportedCount++;
+                                    }
                                     break;
                                 case 128:
                                     unityFont m_Font = new unityFont(asset, true);
                                     if (!ExportFileExists(exportpath + asset.Text + asset.extension, asset.TypeString))
-                                    { ExportFont(m_Font, exportpath + asset.Text + asset.extension); exportedCount++; }
+                                    {
+                                        ExportFont(m_Font, exportpath + asset.Text + asset.extension);
+                                        exportedCount++;
+                                    }
                                     break;
                             }
                         }
@@ -2539,12 +2749,19 @@ namespace UnityStudio
                         statusText = "Finished exporting " + exportedCount.ToString() + " assets.";
                         break;
                 }
-                
-                if (toExport > exportedCount) { statusText += " " + (toExport - exportedCount).ToString() + " assets skipped (not extractable or files already exist)"; }
+
+                if (toExport > exportedCount)
+                {
+                    statusText += " " + (toExport - exportedCount).ToString() +
+                                  " assets skipped (not extractable or files already exist)";
+                }
 
                 StatusStripUpdate(statusText);
 
-                if (openAfterExport.Checked && exportedCount > 0) { System.Diagnostics.Process.Start(savePath); }
+                if (openAfterExport.Checked && exportedCount > 0)
+                {
+                    System.Diagnostics.Process.Start(savePath);
+                }
             }
             else
             {
@@ -2562,7 +2779,7 @@ namespace UnityStudio
             else
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(filename));
-                
+
                 StatusStripUpdate("Exporting " + assetType + Path.GetFileName(filename));
                 return false;
             }
@@ -2578,11 +2795,11 @@ namespace UnityStudio
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             InitializeComponent();
-            uniqueNames.Checked = (bool)Properties.Settings.Default["uniqueNames"];
-            displayInfo.Checked = (bool)Properties.Settings.Default["displayInfo"];
-            enablePreview.Checked = (bool)Properties.Settings.Default["enablePreview"];
-            openAfterExport.Checked = (bool)Properties.Settings.Default["openAfterExport"];
-            assetGroupOptions.SelectedIndex = (int)Properties.Settings.Default["assetGroupOption"];
+            uniqueNames.Checked = (bool) Properties.Settings.Default["uniqueNames"];
+            displayInfo.Checked = (bool) Properties.Settings.Default["displayInfo"];
+            enablePreview.Checked = (bool) Properties.Settings.Default["enablePreview"];
+            openAfterExport.Checked = (bool) Properties.Settings.Default["openAfterExport"];
+            assetGroupOptions.SelectedIndex = (int) Properties.Settings.Default["assetGroupOption"];
             FMODinit();
         }
 
@@ -2624,7 +2841,6 @@ namespace UnityStudio
 
             //FMODinit();
             FMODreset();
-
         }
 
         private void UnityStudioForm_FormClosing(object sender, FormClosingEventArgs e)

@@ -2,10 +2,34 @@
 using System.Windows.Forms;
 using FMOD;
 
+// TODO Double-check channelgroup argument in new FMOD Studio API system.playSound method
+
 namespace UnityStudio
 {
     public partial class UnityStudioForm
     {
+        private FMOD.System system;
+        private Sound sound;
+        private Channel channel;
+        private SoundGroup masterSoundGroup;
+        //private ChannelGroup channelGroup;
+        private MODE loopMode = MODE.LOOP_OFF;
+        private uint FMODlenms;
+        private float FMODVolume = 0.8f;
+        private float FMODfrequency;
+
+        private bool ERRCHECK(RESULT result)
+        {
+            if (result != RESULT.OK)
+            {
+                FMODreset();
+                StatusStripUpdate("FMOD error! " + result + " - " + Error.String(result));
+                return true;
+            }
+
+            return false;
+        }
+
         private void FMODinit()
         {
             FMODreset();
@@ -271,5 +295,42 @@ namespace UnityStudio
             }
         }
 
+        private void TimerTick(object sender, EventArgs e)
+        {
+            uint ms = 0;
+            bool playing = false;
+            bool paused = false;
+
+            if (channel != null)
+            {
+                RESULT result = channel.getPosition(out ms, TIMEUNIT.MS);
+                if (result != RESULT.OK && result != RESULT.ERR_INVALID_HANDLE)
+                {
+                    ERRCHECK(result);
+                }
+
+                result = channel.isPlaying(out playing);
+                if (result != RESULT.OK && result != RESULT.ERR_INVALID_HANDLE)
+                {
+                    ERRCHECK(result);
+                }
+
+                result = channel.getPaused(out paused);
+                if (result != RESULT.OK && result != RESULT.ERR_INVALID_HANDLE)
+                {
+                    ERRCHECK(result);
+                }
+            }
+
+            FMODtimerLabel.Text =
+                ms / 1000 / 60 + ":" + ms / 1000 % 60 + "." + ms / 10 % 100 + " / " +
+                FMODlenms / 1000 / 60 + ":" + FMODlenms / 1000 % 60 + "." + FMODlenms / 10 % 100;
+
+            FMODprogressBar.Value = (int)(ms * 1000 / FMODlenms);
+            FMODstatusLabel.Text = paused ? "Paused " : playing ? "Playing" : "Stopped";
+
+            if (system != null)
+                system.update();
+        }
     }
 }
