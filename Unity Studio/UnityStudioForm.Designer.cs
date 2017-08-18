@@ -1,4 +1,4 @@
-﻿namespace Unity_Studio
+﻿namespace UnityStudio
 {
     partial class UnityStudioForm
     {
@@ -100,7 +100,7 @@
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.saveFolderDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.treeTip = new System.Windows.Forms.ToolTip(this.components);
-            this.sceneTreeView = new Unity_Studio.GOHierarchy();
+            this.sceneTreeView = new UnityStudio.GOHierarchy();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();

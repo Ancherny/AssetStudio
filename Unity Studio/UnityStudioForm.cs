@@ -17,7 +17,7 @@ using System.Web.Script.Serialization;
 // TODO Double-check channelgroup argument in new FMOD Studio API system.playSound method
 // TODO Font index error in Dreamfall Chapters
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     public partial class UnityStudioForm : Form
     {
@@ -1054,8 +1054,8 @@ namespace Unity_Studio
 
         private void selectAsset(object sender, ListViewItemSelectionChangedEventArgs e)
         {
-            previewPanel.BackgroundImage = global::Unity_Studio.Properties.Resources.preview;
-            previewPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            previewPanel.BackgroundImage = Properties.Resources.preview;
+            previewPanel.BackgroundImageLayout = ImageLayout.Center;
             assetInfoLabel.Visible = false;
             assetInfoLabel.Text = null;
             textPreviewBox.Visible = false;
@@ -1803,7 +1803,7 @@ namespace Unity_Studio
                     mb.Append("\n\t\t\tP: \"ShadingModel\", \"KString\", \"\", \"\", \"phong\"");
 
                     #region write material colors
-                    foreach (strColorPair m_Color in m_Material.m_Colors)
+                    foreach (StrColorPair m_Color in m_Material.m_Colors)
                     {
                         switch (m_Color.first)
                         {
@@ -1825,7 +1825,7 @@ namespace Unity_Studio
                     #endregion
 
                     #region write material parameters
-                    foreach (strFloatPair m_Float in m_Material.m_Floats)
+                    foreach (StrFloatPair m_Float in m_Material.m_Floats)
                     {
                         switch (m_Float.first)
                         {
@@ -3072,8 +3072,8 @@ namespace Unity_Studio
             classesListView.Items.Clear();
             classesListView.Groups.Clear();
 
-            previewPanel.BackgroundImage = global::Unity_Studio.Properties.Resources.preview;
-            previewPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            previewPanel.BackgroundImage = Properties.Resources.preview;
+            previewPanel.BackgroundImageLayout = ImageLayout.Center;
             assetInfoLabel.Visible = false;
             assetInfoLabel.Text = null;
             textPreviewBox.Visible = false;

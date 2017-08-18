@@ -98,7 +98,7 @@ The problem is you can never know where the Unity mesh originated from. If it ca
 So it would "fix" meshes that were originally sourced form FBX, but would still have the "extra" rotation in mehses sourced from left-handed formats.
 */
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     public class Mesh
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     public class AssetPreloadData : ListViewItem
     {

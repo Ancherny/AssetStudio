@@ -6,7 +6,7 @@ using System.IO;
 using SevenZip;
 using Lz4;
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     public class BundleFile
     {

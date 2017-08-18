@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     public class PPtr
     {
@@ -75,7 +72,7 @@ namespace Unity_Studio
         }
     }
 
-    class TexEnv
+    internal class TexEnv
     {
         public string name;
         public PPtr m_Texture;
@@ -83,13 +80,13 @@ namespace Unity_Studio
         public float[] m_Offset;
     }
 
-    class strFloatPair
+    internal class StrFloatPair
     {
         public string first;
         public float second;
     }
 
-    class strColorPair
+    internal class StrColorPair
     {
         public string first;
         public float[] second;

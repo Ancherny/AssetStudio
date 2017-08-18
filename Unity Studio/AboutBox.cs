@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     partial class AboutBox : Form
     {

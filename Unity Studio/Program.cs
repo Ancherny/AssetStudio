@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     static class Program
     {

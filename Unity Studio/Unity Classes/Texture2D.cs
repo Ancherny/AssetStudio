@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     class Texture2D
     {

@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Unity_Studio
+﻿namespace UnityStudio
 {
-    class Material
+    internal class Material
     {
+        public readonly string m_Name;
+        public readonly TexEnv[] m_TexEnvs;
+        public readonly StrFloatPair[] m_Floats;
+        public readonly StrColorPair[] m_Colors;
 
-        public string m_Name;
-        public PPtr m_Shader;
-        public string[] m_ShaderKeywords;
-        public int m_CustomRenderQueue;
-        public TexEnv[] m_TexEnvs;
-        public strFloatPair[] m_Floats;
-        public strColorPair[] m_Colors;
-        
         public Material(AssetPreloadData preloadData)
         {
             AssetsFile sourceFile = preloadData.sourceFile;
@@ -24,57 +15,76 @@ namespace Unity_Studio
 
             if (sourceFile.platform == -2)
             {
-                uint m_ObjectHideFlags = a_Stream.ReadUInt32();
-                PPtr m_PrefabParentObject = sourceFile.ReadPPtr();
-                PPtr m_PrefabInternal = sourceFile.ReadPPtr();
+                a_Stream.ReadUInt32(); // uint m_ObjectHideFlags
+                sourceFile.ReadPPtr(); // PPtr m_PrefabParentObject
+                sourceFile.ReadPPtr(); // PPtr m_PrefabInternal
             }
 
             m_Name = a_Stream.ReadAlignedString(a_Stream.ReadInt32());
-            m_Shader = sourceFile.ReadPPtr();
+            sourceFile.ReadPPtr(); // PPtr m_Shader
 
             if (sourceFile.version[0] == 4 && (sourceFile.version[1] >= 2 || (sourceFile.version[1] == 1 && sourceFile.buildType[0] != "a")))
             {
-                m_ShaderKeywords = new string[a_Stream.ReadInt32()];
-                for (int i = 0; i < m_ShaderKeywords.Length; i++)
+                string[] shaderKeywords = new string[a_Stream.ReadInt32()];
+                for (int i = 0; i < shaderKeywords.Length; i++)
                 {
-                    m_ShaderKeywords[i] = a_Stream.ReadAlignedString(a_Stream.ReadInt32());
+                    shaderKeywords[i] = a_Stream.ReadAlignedString(a_Stream.ReadInt32());
                 }
             }
             else if (sourceFile.version[0] == 5)
             {
-                m_ShaderKeywords = new string[1] { a_Stream.ReadAlignedString(a_Stream.ReadInt32()) };
-                uint m_LightmapFlags = a_Stream.ReadUInt32();
+                a_Stream.ReadAlignedString(a_Stream.ReadInt32()); // string[] shaderKeywords
+                a_Stream.ReadUInt32(); // uint m_LightmapFlags
             }
 
-            if (sourceFile.version[0] > 4 || (sourceFile.version[0] == 4 && sourceFile.version[1] >= 3)) { m_CustomRenderQueue = a_Stream.ReadInt32(); }
+            if (sourceFile.version[0] > 4 || (sourceFile.version[0] == 4 && sourceFile.version[1] >= 3))
+            {
+                a_Stream.ReadInt32(); // int m_CustomRenderQueue
+            }
 
             if (sourceFile.version[0] == 5 && sourceFile.version[1] >= 1)
             {
                 string[][] stringTagMap = new string[a_Stream.ReadInt32()][];
                 for (int i = 0; i < stringTagMap.Length; i++)
                 {
-                    stringTagMap[i] = new string[2] { a_Stream.ReadAlignedString(a_Stream.ReadInt32()), a_Stream.ReadAlignedString(a_Stream.ReadInt32()) };
+                    stringTagMap[i] = new []
+                    {
+                        a_Stream.ReadAlignedString(a_Stream.ReadInt32()),
+                        a_Stream.ReadAlignedString(a_Stream.ReadInt32())
+                    };
                 }
             }
 
-                //m_SavedProperties
-                m_TexEnvs = new TexEnv[a_Stream.ReadInt32()];
+            //m_SavedProperties
+            m_TexEnvs = new TexEnv[a_Stream.ReadInt32()];
             for (int i = 0; i < m_TexEnvs.Length; i++)
             {
                 TexEnv m_TexEnv = new TexEnv()
                 {
                     name = a_Stream.ReadAlignedString(a_Stream.ReadInt32()),
                     m_Texture = sourceFile.ReadPPtr(),
-                    m_Scale = new float[2] { a_Stream.ReadSingle(), a_Stream.ReadSingle() },
-                    m_Offset = new float[2] { a_Stream.ReadSingle(), a_Stream.ReadSingle() }
+                    m_Scale = new []
+                    {
+                        a_Stream.ReadSingle(),
+                        a_Stream.ReadSingle()
+                    },
+                    m_Offset = new []
+                    {
+                        a_Stream.ReadSingle(),
+                        a_Stream.ReadSingle()
+                    }
                 };
                 m_TexEnvs[i] = m_TexEnv;
+
+                // Eliminate 'unused' warning on class members
+                float[] unused1 = m_TexEnv.m_Scale;
+                float[] unused2 = m_TexEnv.m_Offset;
             }
 
-            m_Floats = new strFloatPair[a_Stream.ReadInt32()];
+            m_Floats = new StrFloatPair[a_Stream.ReadInt32()];
             for (int i = 0; i < m_Floats.Length; i++)
             {
-                strFloatPair m_Float = new strFloatPair()
+                StrFloatPair m_Float = new StrFloatPair()
                 {
                     first = a_Stream.ReadAlignedString(a_Stream.ReadInt32()),
                     second = a_Stream.ReadSingle()
@@ -82,13 +92,19 @@ namespace Unity_Studio
                 m_Floats[i] = m_Float;
             }
 
-            m_Colors = new strColorPair[a_Stream.ReadInt32()];
+            m_Colors = new StrColorPair[a_Stream.ReadInt32()];
             for (int i = 0; i < m_Colors.Length; i++)
             {
-                strColorPair m_Color = new strColorPair()
+                StrColorPair m_Color = new StrColorPair()
                 {
                     first = a_Stream.ReadAlignedString(a_Stream.ReadInt32()),
-                    second = new float[4] { a_Stream.ReadSingle(), a_Stream.ReadSingle(), a_Stream.ReadSingle(), a_Stream.ReadSingle() }
+                    second = new []
+                    {
+                        a_Stream.ReadSingle(),
+                        a_Stream.ReadSingle(),
+                        a_Stream.ReadSingle(),
+                        a_Stream.ReadSingle()
+                    }
                 };
                 m_Colors[i] = m_Color;
             }

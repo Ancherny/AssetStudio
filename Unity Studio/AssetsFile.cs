@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 //using System.Diagnostics; //remove this later
 
-namespace Unity_Studio
+namespace UnityStudio
 {
     public class AssetsFile
     {
