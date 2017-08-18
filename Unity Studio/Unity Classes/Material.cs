@@ -1,4 +1,6 @@
-﻿namespace UnityStudio
+﻿using Unity_Studio;
+
+namespace UnityStudio
 {
     internal class Material
     {

@@ -127,6 +127,7 @@
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
     <Compile Include="AssetPreloadData.cs" />
+    <Compile Include="PPtrHelpers.cs" />
     <Compile Include="Unity Classes\AudioClip.cs" />
     <Compile Include="Unity Classes\BuildSettings.cs" />
     <Compile Include="BundleFile.cs" />
