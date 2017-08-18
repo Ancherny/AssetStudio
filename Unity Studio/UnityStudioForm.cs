@@ -183,9 +183,11 @@ namespace UnityStudio
                 progressBar1.Value = 0;
                 progressBar1.Maximum = unityFiles.Count;
 
-                //use a for loop because list size can change
-                foreach (string unityFile in unityFiles)
+                // ReSharper disable once ForCanBeConvertedToForeach
+                // use a for loop because list size can change
+                for (int fileId = 0; fileId < unityFiles.Count; fileId++)
                 {
+                    string unityFile = unityFiles[fileId];
                     StatusStripUpdate("Loading " + Path.GetFileName(unityFile));
                     LoadAssetsFile(unityFile);
                 }
@@ -1387,7 +1389,14 @@ namespace UnityStudio
 
                     if (openAfterExport.Checked && File.Exists(saveFileDialog1.FileName))
                     {
-                        System.Diagnostics.Process.Start(saveFileDialog1.FileName);
+                        try
+                        {
+                            System.Diagnostics.Process.Start(saveFileDialog1.FileName);
+                        }
+                        catch (Exception)
+                        {
+                            StatusStripUpdate("Failed to open exported FBX");
+                        }
                     }
                     break;
             }
