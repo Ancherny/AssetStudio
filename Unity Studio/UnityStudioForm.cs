@@ -2452,7 +2452,22 @@ namespace Unity_Studio
                 #endregion
 
                 #region Colors
-                if ((bool)Properties.Settings.Default["exportColors"] && m_Mesh.m_Colors != null && m_Mesh.m_Colors.Length > 0)
+                int channelCount = -1;
+                if ((bool)Properties.Settings.Default["exportColors"] && m_Mesh.m_Colors != null)
+                {
+                    if (m_Mesh.m_Colors.Length == m_Mesh.m_VertexCount * 4)
+                        channelCount = 4;
+                    else if (m_Mesh.m_Colors.Length == m_Mesh.m_VertexCount * 3)
+                        channelCount = 3;
+                    else if (m_Mesh.m_Colors.Length == m_Mesh.m_VertexCount * 2)
+                        channelCount = 2;
+                    else if (m_Mesh.m_Colors.Length == m_Mesh.m_VertexCount)
+                        channelCount = 1;
+                    else
+                        channelCount = 0;
+                }
+
+                if (channelCount > 0)
                 {
                     ob.Append("\n\t\tLayerElementColor: 0 {");
                     ob.Append("\n\t\t\tVersion: 101");
@@ -2467,7 +2482,26 @@ namespace Unity_Studio
                     lineSplit = ob.Length;
                     for (int i = 0; i < m_Mesh.m_VertexCount; i++)
                     {
-                        ob.AppendFormat("{0},{1},{2},{3},", m_Mesh.m_Colors[i * 2], m_Mesh.m_Colors[i * 2 + 1], m_Mesh.m_Colors[i * 2 + 2], m_Mesh.m_Colors[i * 2 + 3]);
+                        int offset = i * channelCount;
+                        switch (channelCount)
+                        {
+                            case 4:
+                                ob.AppendFormat("{0},{1},{2},{3},",
+                                    m_Mesh.m_Colors[offset + 0], m_Mesh.m_Colors[offset + 1], m_Mesh.m_Colors[offset + 2], m_Mesh.m_Colors[offset + 3]);
+                                break;
+                            case 3:
+                                ob.AppendFormat("{0},{1},{2},{3},",
+                                    m_Mesh.m_Colors[offset + 0], m_Mesh.m_Colors[offset + 1], m_Mesh.m_Colors[offset + 2], 1.0f);
+                                break;
+                            case 2:
+                                ob.AppendFormat("{0},{1},{2},{3},",
+                                    m_Mesh.m_Colors[offset + 0], m_Mesh.m_Colors[offset + 1], 0.0f, 1.0f);
+                                break;
+                            case 1:
+                                ob.AppendFormat("{0},{1},{2},{3},",
+                                    m_Mesh.m_Colors[offset], m_Mesh.m_Colors[offset], m_Mesh.m_Colors[offset], 1.0f);
+                                break;
+                        }
 
                         if (ob.Length - lineSplit > 2000)
                         {
