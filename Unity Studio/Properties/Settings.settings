@@ -12,7 +12,7 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="openAfterExport" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="assetGroupOption" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
@@ -30,7 +30,7 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="scaleFactor" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">2.54</Value>
+      <Value Profile="(Default)">1.0</Value>
     </Setting>
     <Setting Name="upAxis" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
