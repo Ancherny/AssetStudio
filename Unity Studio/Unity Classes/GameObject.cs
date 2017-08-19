@@ -57,10 +57,12 @@ namespace UnityStudio
                 a_Stream.ReadInt32(); // int m_Layer
                 int namesize = a_Stream.ReadInt32();
                 m_Name = a_Stream.ReadAlignedString(namesize);
-                if (m_Name == "")
+                if (string.IsNullOrEmpty(m_Name))
                 {
                     m_Name = "GameObject #" + uniqueID;
                 }
+                m_Name = Helpers.FixMayaName(m_Name);
+
                 a_Stream.ReadUInt16(); // ushort m_Tag
                 a_Stream.ReadBoolean(); // bool m_IsActive
 

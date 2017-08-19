@@ -38,4 +38,18 @@ namespace UnityStudio
             ).IsMatch(str);
         }
     }
+
+    internal static class Helpers
+    {
+        public static string FixMayaName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return "_";
+
+            if (char.IsDigit(name[0]))
+                return "_" + name;
+
+            return name;
+        }
+    }
 }
