@@ -1,19 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace UnityStudio
 {
     public partial class ExportOptions : Form
     {
-        public string selectedPath = "";
-
         public ExportOptions()
         {
             InitializeComponent();
@@ -44,14 +35,14 @@ namespace UnityStudio
             Properties.Settings.Default["exportDeformers"] = exportDeformers.Checked;
             Properties.Settings.Default["scaleFactor"] = scaleFactor.Value;
             Properties.Settings.Default["upAxis"] = upAxis.SelectedIndex;
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void fbxCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         private void exportDeformers_CheckedChanged(object sender, EventArgs e)

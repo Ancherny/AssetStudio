@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace UnityStudio
 {
     public class ClassStrStruct : ListViewItem
     {
+        // ReSharper disable once NotAccessedField.Global
         public int ID;
         public string members;
     }
 
     public class ClassIDReference
     {
-        public string[] Names = new string[1121];
-        
+        public readonly string[] Names = new string[1121];
+
         public ClassIDReference()
         {
             Names[1] = "GameObject";
@@ -254,6 +251,5 @@ namespace UnityStudio
             Names[1113] = "LightmapParameters";
             Names[1120] = "LightmapSnapshot";
         }
-
     }
 }
