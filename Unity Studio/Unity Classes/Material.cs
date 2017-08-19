@@ -21,10 +21,10 @@ namespace UnityStudio
                 sourceFile.ReadPPtr(); // PPtr m_PrefabInternal
             }
 
-            m_Name = a_Stream.ReadAlignedString(a_Stream.ReadInt32());
+            m_Name = Helpers.FixMayaName(a_Stream.ReadAlignedString(a_Stream.ReadInt32()));
             sourceFile.ReadPPtr(); // PPtr m_Shader
 
-            if (sourceFile.version[0] == 4 && (sourceFile.version[1] >= 2 || (sourceFile.version[1] == 1 && sourceFile.buildType[0] != "a")))
+            if (sourceFile.version[0] == 4 && (sourceFile.version[1] >= 2 || sourceFile.version[1] == 1 && sourceFile.buildType[0] != "a"))
             {
                 string[] shaderKeywords = new string[a_Stream.ReadInt32()];
                 for (int i = 0; i < shaderKeywords.Length; i++)
@@ -38,7 +38,7 @@ namespace UnityStudio
                 a_Stream.ReadUInt32(); // uint m_LightmapFlags
             }
 
-            if (sourceFile.version[0] > 4 || (sourceFile.version[0] == 4 && sourceFile.version[1] >= 3))
+            if (sourceFile.version[0] > 4 || sourceFile.version[0] == 4 && sourceFile.version[1] >= 3)
             {
                 a_Stream.ReadInt32(); // int m_CustomRenderQueue
             }

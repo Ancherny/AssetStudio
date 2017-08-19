@@ -68,7 +68,7 @@ namespace UnityStudio
                 PPtr m_PrefabInternal = sourceFile.ReadPPtr();
             }
 
-            m_Name = a_Stream.ReadAlignedString(a_Stream.ReadInt32());
+            m_Name = Helpers.FixMayaName(a_Stream.ReadAlignedString(a_Stream.ReadInt32()));
             m_Width = a_Stream.ReadInt32();
             m_Height = a_Stream.ReadInt32();
             m_CompleteImageSize = a_Stream.ReadInt32();
