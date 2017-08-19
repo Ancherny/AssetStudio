@@ -186,6 +186,7 @@ namespace UnityStudio
 
                     #region write material colors
 
+                    bool hasSpecualar = false;
                     foreach (StrColorPair m_Color in m_Material.m_Colors)
                     {
                         switch (m_Color.first)
@@ -198,6 +199,7 @@ namespace UnityStudio
                             case "_SpecularColor": //then what is _SpecColor??
                                 mb.AppendFormat("\n\t\t\tP: \"SpecularColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
                                     m_Color.second[0], m_Color.second[1], m_Color.second[2]);
+                                hasSpecualar = true;
                                 break;
                             case "_ReflectColor":
                                 mb.AppendFormat("\n\t\t\tP: \"AmbientColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
@@ -210,6 +212,8 @@ namespace UnityStudio
                                 break;
                         }
                     }
+                    if (!hasSpecualar)
+                        mb.Append("\n\t\t\tP: \"SpecularColor\", \"Color\", \"\", \"A\",0,0,0");
 
                     #endregion
 
