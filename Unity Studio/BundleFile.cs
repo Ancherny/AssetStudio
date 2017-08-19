@@ -6,10 +6,11 @@ namespace UnityStudio
 {
     public class BundleFile
     {
-        public int ver1;
-        public string ver2;
+        private int ver1;
+        // ReSharper disable once NotAccessedField.Local
+        private string ver2;
         public string ver3;
-        public List<MemoryAssetsFile> MemoryAssetsFileList = new List<MemoryAssetsFile>();
+        public readonly List<MemoryAssetsFile> MemoryAssetsFileList = new List<MemoryAssetsFile>();
 
         public class MemoryAssetsFile
         {
@@ -25,10 +26,10 @@ namespace UnityStudio
 
                 using (BinaryReader lz4Stream = new BinaryReader(File.OpenRead(fileName)))
                 {
-                    int version = lz4Stream.ReadInt32();
+                    lz4Stream.ReadInt32(); // int version
                     int uncompressedSize = lz4Stream.ReadInt32();
                     int compressedSize = lz4Stream.ReadInt32();
-                    int something = lz4Stream.ReadInt32(); //1
+                    lz4Stream.ReadInt32(); // int something 1
 
                     byte[] lz4buffer = new byte[compressedSize];
                     lz4Stream.Read(lz4buffer, 0, compressedSize);
@@ -42,7 +43,9 @@ namespace UnityStudio
                         {
                             int nRead = decoder.Read(filebuffer, 0, uncompressedSize);
                             if (nRead == 0)
+                            {
                                 break;
+                            }
                         }
                     }
                 }
@@ -70,10 +73,13 @@ namespace UnityStudio
                 ver1 = b_Stream.ReadInt32();
                 ver2 = b_Stream.ReadStringToNull();
                 ver3 = b_Stream.ReadStringToNull();
-                if (ver1 < 6) { int bundleSize = b_Stream.ReadInt32(); }
+                if (ver1 < 6)
+                {
+                    b_Stream.ReadInt32(); // int bundleSize
+                }
                 else
                 {
-                    long bundleSize = b_Stream.ReadInt64();
+                    b_Stream.ReadInt64(); // long bundleSize
                     return;
                 }
                 short dummy2 = b_Stream.ReadInt16();
@@ -82,12 +88,10 @@ namespace UnityStudio
                 int lzmaChunks = b_Stream.ReadInt32();
 
                 int lzmaSize = 0;
-                long streamSize = 0;
-
                 for (int i = 0; i < lzmaChunks; i++)
                 {
                     lzmaSize = b_Stream.ReadInt32();
-                    streamSize = b_Stream.ReadInt32();
+                    b_Stream.ReadInt32(); //long streamSize
                 }
 
                 b_Stream.Position = offset;
@@ -95,31 +99,31 @@ namespace UnityStudio
                 {
                     case "\xFA\xFA\xFA\xFA\xFA\xFA\xFA\xFA": //.bytes
                     case "UnityWeb":
-                        {
-                            byte[] lzmaBuffer = new byte[lzmaSize];
-                            b_Stream.Read(lzmaBuffer, 0, lzmaSize);
+                    {
+                        byte[] lzmaBuffer = new byte[lzmaSize];
+                        b_Stream.Read(lzmaBuffer, 0, lzmaSize);
 
-                            using (EndianStream lzmaStream = new EndianStream(SevenZip.Compression.LZMA.SevenZipHelper.StreamDecompress(new MemoryStream(lzmaBuffer)), EndianType.BigEndian))
-                            {
-                                getFiles(lzmaStream, 0);
-                            }
-                            break;
+                        using (EndianStream lzmaStream = new EndianStream(
+                            SevenZip.Compression.LZMA.SevenZipHelper.StreamDecompress(new MemoryStream(lzmaBuffer)),
+                            EndianType.BigEndian))
+                        {
+                            getFiles(lzmaStream, 0);
                         }
+                        break;
+                    }
                     case "UnityRaw":
-                        {
-                            getFiles(b_Stream, offset);
-                            break;
-                        }
+                    {
+                        getFiles(b_Stream, offset);
+                        break;
+                    }
                 }
-
-
             }
             else if (header == "UnityFS")
             {
                 ver1 = b_Stream.ReadInt32();
                 ver2 = b_Stream.ReadStringToNull();
                 ver3 = b_Stream.ReadStringToNull();
-                long bundleSize = b_Stream.ReadInt64();
+                b_Stream.ReadInt64(); // long bundleSize
             }
         }
 
