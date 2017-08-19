@@ -6,6 +6,7 @@ namespace UnityStudio
     {
         //m_FileID 0 means current file
         public int m_FileID = -1;
+
         //m_PathID acts more like a hash in some games
         public long m_PathID = 0;
     }
@@ -19,10 +20,18 @@ namespace UnityStudio
 
             int FileID = a_Stream.ReadInt32();
             if (FileID >= 0 && FileID < sourceFile.sharedAssetsList.Count)
-            { result.m_FileID = sourceFile.sharedAssetsList[FileID].Index; }
+            {
+                result.m_FileID = sourceFile.sharedAssetsList[FileID].Index;
+            }
 
-            if (sourceFile.fileGen < 14) { result.m_PathID = a_Stream.ReadInt32(); }
-            else { result.m_PathID = a_Stream.ReadInt64(); }
+            if (sourceFile.fileGen < 14)
+            {
+                result.m_PathID = a_Stream.ReadInt32();
+            }
+            else
+            {
+                result.m_PathID = a_Stream.ReadInt64();
+            }
 
             return result;
         }
@@ -36,7 +45,10 @@ namespace UnityStudio
                 AssetsFile sourceFile = assetsfileList[m_elm.m_FileID];
 
                 //TryGetValue should be safe because m_PathID is 0 when initialized and PathID values range from 1
-                if (sourceFile.preloadTable.TryGetValue(m_elm.m_PathID, out result)) { return true; }
+                if (sourceFile.preloadTable.TryGetValue(m_elm.m_PathID, out result))
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -50,13 +62,17 @@ namespace UnityStudio
             {
                 AssetsFile sourceFile = assetsfileList[m_elm.m_FileID];
 
-                if (sourceFile.TransformList.TryGetValue(m_elm.m_PathID, out m_Transform)) { return true; }
+                if (sourceFile.TransformList.TryGetValue(m_elm.m_PathID, out m_Transform))
+                {
+                    return true;
+                }
             }
 
             return false;
         }
 
-        public static bool TryGetGameObject(this List<AssetsFile> assetsfileList, PPtr m_elm, out GameObject m_GameObject)
+        public static bool TryGetGameObject(this List<AssetsFile> assetsfileList, PPtr m_elm,
+            out GameObject m_GameObject)
         {
             m_GameObject = null;
 
@@ -64,7 +80,10 @@ namespace UnityStudio
             {
                 AssetsFile sourceFile = assetsfileList[m_elm.m_FileID];
 
-                if (sourceFile.GameObjectList.TryGetValue(m_elm.m_PathID, out m_GameObject)) { return true; }
+                if (sourceFile.GameObjectList.TryGetValue(m_elm.m_PathID, out m_GameObject))
+                {
+                    return true;
+                }
             }
 
             return false;
