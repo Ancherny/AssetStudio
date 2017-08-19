@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace UnityStudio
 {
@@ -46,10 +47,31 @@ namespace UnityStudio
             if (string.IsNullOrEmpty(name))
                 return "_";
 
-            if (char.IsDigit(name[0]))
-                return "_" + name;
+            string ascii = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(name));
+            StringBuilder newName = new StringBuilder();
+            foreach (char c in ascii)
+            {
+                if (c == '?')
+                {
+                    newName.Append('Q');
+                    continue;
+                }
 
-            return name;
+                if (!char.IsDigit(c) && !char.IsLetter(c))
+                {
+                    newName.Append('_');
+                    continue;
+                }
+
+                if (newName.Length <= 0)
+                {
+                    if (char.IsDigit(c))
+                        newName.Append('_');
+                }
+                newName.Append(c);
+            }
+
+            return newName.ToString();
         }
     }
 }
