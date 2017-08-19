@@ -4,16 +4,13 @@ namespace UnityStudio
 {
     public class GameObject : TreeNode
     {
-        public PPtr m_Transform;
-        public PPtr m_Renderer;
-        public PPtr m_MeshFilter;
-        public PPtr m_SkinnedMeshRenderer;
-        public int m_Layer;
+        public readonly PPtr m_Transform;
+        public readonly PPtr m_Renderer;
+        public readonly PPtr m_MeshFilter;
+        public readonly PPtr m_SkinnedMeshRenderer;
         public string m_Name;
-        public ushort m_Tag;
-        public bool m_IsActive;
-        
-        public string uniqueID = "0";//this way file and folder TreeNodes will be treated as FBX scene
+
+        public readonly string uniqueID = "0"; //this way file and folder TreeNodes will be treated as FBX scene
 
         public GameObject(AssetPreloadData preloadData)
         {
@@ -27,9 +24,9 @@ namespace UnityStudio
 
                 if (sourceFile.platform == -2)
                 {
-                    uint m_ObjectHideFlags = a_Stream.ReadUInt32();
-                    PPtr m_PrefabParentObject = sourceFile.ReadPPtr();
-                    PPtr m_PrefabInternal = sourceFile.ReadPPtr();
+                    a_Stream.ReadUInt32(); // uint m_ObjectHideFlags
+                    sourceFile.ReadPPtr(); // PPtr m_PrefabParentObject
+                    sourceFile.ReadPPtr(); // PPtr m_PrefabInternal
                 }
 
                 int m_Component_size = a_Stream.ReadInt32();
@@ -52,21 +49,24 @@ namespace UnityStudio
                             m_SkinnedMeshRenderer = sourceFile.ReadPPtr();
                             break;
                         default:
-                            PPtr m_Component = sourceFile.ReadPPtr();
+                            sourceFile.ReadPPtr(); // PPtr m_Component
                             break;
                     }
                 }
 
-                m_Layer = a_Stream.ReadInt32();
+                a_Stream.ReadInt32(); // int m_Layer
                 int namesize = a_Stream.ReadInt32();
                 m_Name = a_Stream.ReadAlignedString(namesize);
-                if (m_Name == "") { m_Name = "GameObject #" + uniqueID; }
-                m_Tag = a_Stream.ReadUInt16();
-                m_IsActive = a_Stream.ReadBoolean();
-                
-                base.Text = m_Name;
+                if (m_Name == "")
+                {
+                    m_Name = "GameObject #" + uniqueID;
+                }
+                a_Stream.ReadUInt16(); // ushort m_Tag
+                a_Stream.ReadBoolean(); // bool m_IsActive
+
+                Text = m_Name;
                 //name should be unique
-                base.Name = uniqueID;
+                Name = uniqueID;
             }
         }
     }
