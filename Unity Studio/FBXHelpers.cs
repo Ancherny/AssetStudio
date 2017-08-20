@@ -116,7 +116,7 @@ namespace UnityStudio
                             }
                         }
 
-                        if (!(bool) Properties.Settings.Default["exportDeformers"])
+                        if (!(bool) Properties.Settings.Default["convertDummies"])
                             continue;
 
                         DeformerCount += m_SkinnedMeshRenderer.m_Bones.Length;
@@ -435,8 +435,7 @@ namespace UnityStudio
                 {
                     if (m_GameObject.m_MeshFilter == null && m_GameObject.m_SkinnedMeshRenderer == null)
                     {
-                        if ((bool) Properties.Settings.Default["exportDeformers"] &&
-                            (bool) Properties.Settings.Default["convertDummies"] && LimbNodes.Contains(m_GameObject))
+                        if ((bool) Properties.Settings.Default["convertDummies"] && LimbNodes.Contains(m_GameObject))
                         {
                             ob.AppendFormat("\n\tNodeAttribute: 2{0}, \"NodeAttribute::\", \"LimbNode\" {{",
                                 m_GameObject.uniqueID);
