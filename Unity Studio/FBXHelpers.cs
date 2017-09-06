@@ -176,6 +176,73 @@ namespace UnityStudio
                 {
                     Material m_Material = new Material(MaterialPD);
 
+                    bool hasDiffuseTexture = false;
+                    bool hasSpecularTexture = false;
+
+                    #region write texture connections
+
+                    foreach (TexEnv m_TexEnv in m_Material.m_TexEnvs)
+                    {
+                        AssetPreloadData TexturePD;
+
+                        #region get Porsche material from json
+
+                        if (!assetsfileList.TryGetPD(m_TexEnv.m_Texture, out TexturePD) && jsonMats != null)
+                        {
+                            Dictionary<string, string> matProp;
+                            if (jsonMats.TryGetValue(m_Material.m_Name, out matProp))
+                            {
+                                string texName;
+                                if (matProp.TryGetValue(m_TexEnv.name, out texName))
+                                {
+                                    foreach (AssetPreloadData asset in exportableAssets)
+                                    {
+                                        if (asset.Type2 == 28 && asset.Text == texName)
+                                        {
+                                            TexturePD = asset;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #endregion
+
+                        if (TexturePD != null && TexturePD.Type2 == 28)
+                        {
+                            Textures.Add(TexturePD);
+
+                            cb2.AppendFormat("\n\n\t;Texture::, Material::{0}", m_Material.m_Name);
+                            cb2.AppendFormat("\n\tC: \"OP\",7{0},6{1}, \"", TexturePD.uniqueID, MaterialPD.uniqueID);
+
+                            switch (m_TexEnv.name)
+                            {
+                                case "_MainTex":
+                                case "gDiffuseSampler":
+                                    hasDiffuseTexture = true;
+                                    cb2.Append("DiffuseColor\"");
+                                    break;
+                                case "_SpecularMap":
+                                case "gSpecularSampler":
+                                    hasSpecularTexture = true;
+                                    cb2.Append("SpecularColor\"");
+                                    break;
+                                case "_NormalMap":
+                                case "gNormalSampler":
+                                    cb2.Append("NormalMap\"");
+                                    break;
+                                case "_BumpMap":
+                                    cb2.Append("Bump\"");
+                                    break;
+                                default:
+                                    cb2.AppendFormat("{0}\"", m_TexEnv.name);
+                                    break;
+                            }
+                        }
+                    }
+
+                    #endregion
                     mb.AppendFormat("\n\tMaterial: 6{0}, \"Material::{1}\", \"\" {{", MaterialPD.uniqueID,
                         m_Material.m_Name);
                     mb.Append("\n\t\tVersion: 102");
@@ -193,13 +260,17 @@ namespace UnityStudio
                         {
                             case "_Color":
                             case "gSurfaceColor":
-                                mb.AppendFormat("\n\t\t\tP: \"DiffuseColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
-                                    m_Color.second[0], m_Color.second[1], m_Color.second[2]);
+                                if (!hasDiffuseTexture)
+                                    mb.AppendFormat("\n\t\t\tP: \"DiffuseColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
+                                        m_Color.second[0], m_Color.second[1], m_Color.second[2]);
                                 break;
                             case "_SpecularColor": //then what is _SpecColor??
-                                mb.AppendFormat("\n\t\t\tP: \"SpecularColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
-                                    m_Color.second[0], m_Color.second[1], m_Color.second[2]);
-                                hasSpecualar = true;
+                                if (!hasSpecularTexture)
+                                {
+                                    mb.AppendFormat("\n\t\t\tP: \"SpecularColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
+                                        m_Color.second[0], m_Color.second[1], m_Color.second[2]);
+                                    hasSpecualar = true;
+                                }
                                 break;
                             case "_ReflectColor":
                                 mb.AppendFormat("\n\t\t\tP: \"AmbientColor\", \"Color\", \"\", \"A\",{0},{1},{2}",
@@ -248,69 +319,6 @@ namespace UnityStudio
                     //mb.Append("\n\t\t\tP: \"SpecularFactor\", \"Number\", \"\", \"A\",0");
                     mb.Append("\n\t\t}");
                     mb.Append("\n\t}");
-
-                    #region write texture connections
-
-                    foreach (TexEnv m_TexEnv in m_Material.m_TexEnvs)
-                    {
-                        AssetPreloadData TexturePD;
-
-                        #region get Porsche material from json
-
-                        if (!assetsfileList.TryGetPD(m_TexEnv.m_Texture, out TexturePD) && jsonMats != null)
-                        {
-                            Dictionary<string, string> matProp;
-                            if (jsonMats.TryGetValue(m_Material.m_Name, out matProp))
-                            {
-                                string texName;
-                                if (matProp.TryGetValue(m_TexEnv.name, out texName))
-                                {
-                                    foreach (AssetPreloadData asset in exportableAssets)
-                                    {
-                                        if (asset.Type2 == 28 && asset.Text == texName)
-                                        {
-                                            TexturePD = asset;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        #endregion
-
-                        if (TexturePD != null && TexturePD.Type2 == 28)
-                        {
-                            Textures.Add(TexturePD);
-
-                            cb2.AppendFormat("\n\n\t;Texture::, Material::{0}", m_Material.m_Name);
-                            cb2.AppendFormat("\n\tC: \"OP\",7{0},6{1}, \"", TexturePD.uniqueID, MaterialPD.uniqueID);
-
-                            switch (m_TexEnv.name)
-                            {
-                                case "_MainTex":
-                                case "gDiffuseSampler":
-                                    cb2.Append("DiffuseColor\"");
-                                    break;
-                                case "_SpecularMap":
-                                case "gSpecularSampler":
-                                    cb2.Append("SpecularColor\"");
-                                    break;
-                                case "_NormalMap":
-                                case "gNormalSampler":
-                                    cb2.Append("NormalMap\"");
-                                    break;
-                                case "_BumpMap":
-                                    cb2.Append("Bump\"");
-                                    break;
-                                default:
-                                    cb2.AppendFormat("{0}\"", m_TexEnv.name);
-                                    break;
-                            }
-                        }
-                    }
-
-                    #endregion
                 }
 
                 #endregion
