@@ -42,6 +42,9 @@ namespace UnityStudio
                 // 8: Video
                 // 9:
 
+                Dictionary<string, string> modelGeometryMap = new Dictionary<string, string>();
+                Dictionary<string, string> modelMaterialMap = new Dictionary<string, string>();
+
                 #region loop nodes and collect objects for export
 
                 foreach (AssetsFile assetsFile in assetsfileList)
@@ -69,6 +72,7 @@ namespace UnityStudio
                                 // are not unique, they cannot be used for instancing geometry
                                 cb2.AppendFormat("\n\n\t;Geometry::, Model::{0}", m_GameObject.m_Name);
                                 cb2.AppendFormat("\n\tC: \"OO\",3{0},1{1}", MeshPD.uniqueID, m_GameObject.uniqueID);
+                                modelGeometryMap[m_GameObject.uniqueID] = MeshPD.uniqueID;
                             }
                         }
 
@@ -86,8 +90,9 @@ namespace UnityStudio
                                 {
                                     Materials.Add(MaterialPD);
                                     cb2.AppendFormat("\n\n\t;Material::, Model::{0}", m_GameObject.m_Name);
-                                    cb2.AppendFormat("\n\tC: \"OO\",6{0},1{1}", MaterialPD.uniqueID,
-                                        m_GameObject.uniqueID);
+                                    cb2.AppendFormat("\n\tC: \"OO\",6{0},1{1}",
+                                        MaterialPD.uniqueID, m_GameObject.uniqueID);
+                                    modelMaterialMap[m_GameObject.uniqueID] = MaterialPD.uniqueID;
                                 }
                             }
                         }
@@ -166,6 +171,40 @@ namespace UnityStudio
                 }
 
                 GameObjects.UnionWith(LimbNodes);
+
+                #endregion
+
+                #region Fix material assignment to instanced geometries
+                //  As Maya do not accept different materials on the same geometry instance
+
+                // Collect geometry matrial assignment
+                Dictionary<string, string> geometryMaterialMap = new Dictionary<string, string>();
+                foreach (KeyValuePair<string,string> pair in modelGeometryMap)
+                {
+                    string model = pair.Key;
+                    string geometry = pair.Value;
+                    string material;
+                    if (!modelMaterialMap.TryGetValue(model, out material))
+                        continue;
+
+                    geometryMaterialMap[geometry] = material;
+                }
+
+                // Assign collected materials to models if not assigned already
+                foreach (KeyValuePair<string, string> pair in modelGeometryMap)
+                {
+                    string model = pair.Key;
+                    string geometry = pair.Value;
+                    string material;
+                    if (modelMaterialMap.ContainsKey(model))
+                        continue;
+
+                    if (!geometryMaterialMap.TryGetValue(geometry, out material))
+                        continue;
+
+                    cb2.AppendFormat("\n\n\t;Material::, Model::");
+                    cb2.AppendFormat("\n\tC: \"OO\",6{0},1{1}", material, model);
+                }
 
                 #endregion
 
