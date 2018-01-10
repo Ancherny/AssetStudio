@@ -53,6 +53,9 @@
     <ApplicationIcon>Resources\unity.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=11.1.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
+      <HintPath>JetBrains\JetBrains.Annotations.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Half, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
