@@ -1447,44 +1447,48 @@ namespace UnityStudio
                             //AudioClip and Texture2D extensions are set when the list is built
                             //so their overwrite tests can be done without loading them again
 
+                            string exportFile = exportpath + asset.Text + asset.extension;
+
                             switch (asset.Type2)
                             {
                                 case 28:
-                                    if (!ExportFileExists(exportpath + asset.Text + asset.extension, asset.TypeString))
+                                    if (ExportFileExists(exportFile, asset.TypeString))
                                     {
-                                        ExportTexture(new Texture2D(asset, true),
-                                            exportpath + asset.Text + asset.extension);
-                                        exportedCount++;
+                                        break;
                                     }
+
+                                    ExportTexture(new Texture2D(asset, true), exportFile);
+                                    exportedCount++;
                                     break;
+
                                 case 83:
-                                    if (!ExportFileExists(exportpath + asset.Text + asset.extension, asset.TypeString))
+                                    if (!ExportFileExists(exportFile, asset.TypeString))
                                     {
-                                        ExportAudioClip(new AudioClip(asset, true),
-                                            exportpath + asset.Text + asset.extension);
+                                        ExportAudioClip(new AudioClip(asset, true), exportFile);
                                         exportedCount++;
                                     }
                                     break;
                                 case 48:
-                                    if (!ExportFileExists(exportpath + asset.Text + ".txt", asset.TypeString))
+                                    exportFile = exportpath + asset.Text + ".txt";
+                                    if (!ExportFileExists(exportFile, asset.TypeString))
                                     {
-                                        ExportText(new TextAsset(asset, true), exportpath + asset.Text + ".txt");
+                                        ExportText(new TextAsset(asset, true), exportFile);
                                         exportedCount++;
                                     }
                                     break;
                                 case 49:
                                     TextAsset m_TextAsset = new TextAsset(asset, true);
-                                    if (!ExportFileExists(exportpath + asset.Text + asset.extension, asset.TypeString))
+                                    if (!ExportFileExists(exportFile, asset.TypeString))
                                     {
-                                        ExportText(m_TextAsset, exportpath + asset.Text + asset.extension);
+                                        ExportText(m_TextAsset, exportFile);
                                         exportedCount++;
                                     }
                                     break;
                                 case 128:
                                     unityFont m_Font = new unityFont(asset, true);
-                                    if (!ExportFileExists(exportpath + asset.Text + asset.extension, asset.TypeString))
+                                    if (!ExportFileExists(exportFile, asset.TypeString))
                                     {
-                                        ExportFont(m_Font, exportpath + asset.Text + asset.extension);
+                                        ExportFont(m_Font, exportFile);
                                         exportedCount++;
                                     }
                                     break;
