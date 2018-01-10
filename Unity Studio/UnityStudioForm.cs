@@ -1420,7 +1420,7 @@ namespace UnityStudio
             switch (asset.Type2)
             {
                 case 28:
-                    if (ExportFileExists(exportFile, asset.TypeString))
+                    if (ExportFileExists(ref exportFile, asset.TypeString))
                     {
                         break;
                     }
@@ -1430,7 +1430,7 @@ namespace UnityStudio
                     break;
 
                 case 83:
-                    if (!ExportFileExists(exportFile, asset.TypeString))
+                    if (!ExportFileExists(ref exportFile, asset.TypeString))
                     {
                         ExportAudioClip(new AudioClip(asset, true), exportFile);
                         exportedCount++;
@@ -1439,7 +1439,7 @@ namespace UnityStudio
 
                 case 48:
                     exportFile = exportpath + asset.Text + ".txt";
-                    if (!ExportFileExists(exportFile, asset.TypeString))
+                    if (!ExportFileExists(ref exportFile, asset.TypeString))
                     {
                         ExportText(new TextAsset(asset, true), exportFile);
                         exportedCount++;
@@ -1448,7 +1448,7 @@ namespace UnityStudio
 
                 case 49:
                     TextAsset m_TextAsset = new TextAsset(asset, true);
-                    if (!ExportFileExists(exportFile, asset.TypeString))
+                    if (!ExportFileExists(ref exportFile, asset.TypeString))
                     {
                         ExportText(m_TextAsset, exportFile);
                         exportedCount++;
@@ -1457,7 +1457,7 @@ namespace UnityStudio
 
                 case 128:
                     unityFont m_Font = new unityFont(asset, true);
-                    if (!ExportFileExists(exportFile, asset.TypeString))
+                    if (!ExportFileExists(ref exportFile, asset.TypeString))
                     {
                         ExportFont(m_Font, exportFile);
                         exportedCount++;
@@ -1553,17 +1553,35 @@ namespace UnityStudio
             }
         }
 
-        private bool ExportFileExists(string filename, string assetType)
+        private bool ExportFileExists(ref string filename, string assetType)
         {
             if (File.Exists(filename))
             {
-                StatusStripUpdate(assetType + " file " + Path.GetFileName(filename) + " already exists");
-                return true;
+                if (!(bool) Properties.Settings.Default["doGiveUniqueAssetNames"])
+                {
+                    StatusStripUpdate(assetType + " file " + Path.GetFileName(filename) + " already exists");
+                    return true;
+                }
+
+                int safeCount = 0;
+                const int safeLimit = 32;
+                do
+                {
+                    int pos = filename.LastIndexOf(".", StringComparison.InvariantCulture);
+                    string ext = pos < 0 ? null : filename.Substring(pos);
+                    string name = pos < 0 ? filename : filename.Substring(0, pos);
+                    filename = name + "_" + ext;
+                    ++safeCount;
+
+                } while (File.Exists(filename) && safeCount <= safeLimit);
             }
+
+            if (File.Exists(filename))
+                return true;
 
             // ReSharper disable once AssignNullToNotNullAttribute
             Directory.CreateDirectory(Path.GetDirectoryName(filename));
-            StatusStripUpdate("Exporting " + assetType + Path.GetFileName(filename));
+            StatusStripUpdate("Exporting " + assetType + " " + Path.GetFileName(filename));
             return false;
         }
 
