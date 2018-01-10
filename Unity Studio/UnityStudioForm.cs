@@ -1420,7 +1420,7 @@ namespace UnityStudio
             switch (asset.Type2)
             {
                 case 28:
-                    if (ExportFileExists(ref exportFile, asset.TypeString))
+                    if (ExportFileExists(ref exportFile, asset))
                     {
                         break;
                     }
@@ -1430,7 +1430,7 @@ namespace UnityStudio
                     break;
 
                 case 83:
-                    if (!ExportFileExists(ref exportFile, asset.TypeString))
+                    if (!ExportFileExists(ref exportFile, asset))
                     {
                         ExportAudioClip(new AudioClip(asset, true), exportFile);
                         exportedCount++;
@@ -1439,7 +1439,7 @@ namespace UnityStudio
 
                 case 48:
                     exportFile = exportpath + asset.Text + ".txt";
-                    if (!ExportFileExists(ref exportFile, asset.TypeString))
+                    if (!ExportFileExists(ref exportFile, asset))
                     {
                         ExportText(new TextAsset(asset, true), exportFile);
                         exportedCount++;
@@ -1448,7 +1448,7 @@ namespace UnityStudio
 
                 case 49:
                     TextAsset m_TextAsset = new TextAsset(asset, true);
-                    if (!ExportFileExists(ref exportFile, asset.TypeString))
+                    if (!ExportFileExists(ref exportFile, asset))
                     {
                         ExportText(m_TextAsset, exportFile);
                         exportedCount++;
@@ -1457,7 +1457,7 @@ namespace UnityStudio
 
                 case 128:
                     unityFont m_Font = new unityFont(asset, true);
-                    if (!ExportFileExists(ref exportFile, asset.TypeString))
+                    if (!ExportFileExists(ref exportFile, asset))
                     {
                         ExportFont(m_Font, exportFile);
                         exportedCount++;
@@ -1485,7 +1485,7 @@ namespace UnityStudio
             }
             string exportpath = savePath + "\\";
 
-            HashSet<int> selectedAssetIds = new HashSet<int>();
+            HashSet<string> selectedAssetIds = new HashSet<string>();
 
             bool exportFiltered = ((ToolStripItem) sender).Name == "exportFilteredAssetsMenuItem";
             bool exportSelected = ((ToolStripItem) sender).Name == "exportSelectedAssetsMenuItem";
@@ -1495,7 +1495,7 @@ namespace UnityStudio
                 {
                     if (index >= 0 && index < visibleAssets.Count)
                     {
-                        selectedAssetIds.Add(visibleAssets[index].Index);
+                        selectedAssetIds.Add(visibleAssets[index].uniqueID);
                     }
                 }
             }
@@ -1514,7 +1514,7 @@ namespace UnityStudio
 
                 foreach (AssetPreloadData asset in assetsFile.exportableAssets)
                 {
-                    if (selectedAssetIds.Count > 0 && !selectedAssetIds.Contains(asset.Index))
+                    if (selectedAssetIds.Count > 0 && !selectedAssetIds.Contains(asset.uniqueID))
                         continue;
 
                     if (assetGroupOptions.SelectedIndex == 0)
@@ -1553,31 +1553,23 @@ namespace UnityStudio
             }
         }
 
-        private bool ExportFileExists(ref string filename, string assetType)
+        private bool ExportFileExists([NotNull]ref string filename, [NotNull]AssetPreloadData asset)
         {
-            if (File.Exists(filename))
+            string assetType = asset.TypeString;
+
+            if ((bool) Properties.Settings.Default["doGiveUniqueAssetNames"])
             {
-                if (!(bool) Properties.Settings.Default["doGiveUniqueAssetNames"])
-                {
-                    StatusStripUpdate(assetType + " file " + Path.GetFileName(filename) + " already exists");
-                    return true;
-                }
-
-                int safeCount = 0;
-                const int safeLimit = 32;
-                do
-                {
-                    int pos = filename.LastIndexOf(".", StringComparison.InvariantCulture);
-                    string ext = pos < 0 ? null : filename.Substring(pos);
-                    string name = pos < 0 ? filename : filename.Substring(0, pos);
-                    filename = name + "_" + ext;
-                    ++safeCount;
-
-                } while (File.Exists(filename) && safeCount <= safeLimit);
+                int pos = filename.LastIndexOf(".", StringComparison.InvariantCulture);
+                string ext = pos < 0 ? null : filename.Substring(pos);
+                string name = pos < 0 ? filename : filename.Substring(0, pos);
+                filename = name + "_#" + asset.uniqueID + ext;
             }
 
             if (File.Exists(filename))
+            {
+                StatusStripUpdate(assetType + " file " + Path.GetFileName(filename) + " already exists");
                 return true;
+            }
 
             // ReSharper disable once AssignNullToNotNullAttribute
             Directory.CreateDirectory(Path.GetDirectoryName(filename));
