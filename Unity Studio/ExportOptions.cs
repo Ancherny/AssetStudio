@@ -15,6 +15,7 @@ namespace UnityStudio
             exportDeformers.Checked = (bool)Properties.Settings.Default["exportDeformers"];
             convertDummies.Checked = (bool)Properties.Settings.Default["convertDummies"];
             convertDummies.Enabled = (bool)Properties.Settings.Default["exportDeformers"];
+            doGiveUniqueAssetNames.Checked = (bool)Properties.Settings.Default["doGiveUniqueAssetNames"];
             scaleFactor.Value = (decimal)Properties.Settings.Default["scaleFactor"];
             upAxis.SelectedIndex = (int)Properties.Settings.Default["upAxis"];
             showExpOpt.Checked = (bool)Properties.Settings.Default["showExpOpt"];

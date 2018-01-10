@@ -178,7 +178,7 @@ namespace UnityStudio.Properties {
                 this["exportDeformers"] = value;
             }
         }
-        
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
@@ -188,6 +188,18 @@ namespace UnityStudio.Properties {
             }
             set {
                 this["convertDummies"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool doGiveUniqueAssetNames {
+            get {
+                return ((bool)(this["doGiveUniqueAssetNames"]));
+            }
+            set {
+                this["doGiveUniqueAssetNames"] = value;
             }
         }
     }

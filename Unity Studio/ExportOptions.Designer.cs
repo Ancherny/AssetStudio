@@ -30,6 +30,7 @@
         {
             this.includeBox = new System.Windows.Forms.GroupBox();
             this.convertDummies = new System.Windows.Forms.CheckBox();
+            this.doGiveUniqueAssetNames = new System.Windows.Forms.CheckBox();
             this.embedBox = new System.Windows.Forms.CheckBox();
             this.lightsBox = new System.Windows.Forms.CheckBox();
             this.camerasBox = new System.Windows.Forms.CheckBox();
@@ -69,9 +70,9 @@
             this.includeBox.TabIndex = 0;
             this.includeBox.TabStop = false;
             this.includeBox.Text = "Include";
-            // 
+            //
             // convertDummies
-            // 
+            //
             this.convertDummies.AutoSize = true;
             this.convertDummies.Location = new System.Drawing.Point(14, 178);
             this.convertDummies.Name = "convertDummies";
@@ -80,7 +81,7 @@
             this.convertDummies.Text = "Convert Deforming Dummies to Bones";
             this.convertDummies.UseVisualStyleBackColor = true;
             this.convertDummies.CheckedChanged += new System.EventHandler(this.exportOpnions_CheckedChanged);
-            // 
+            //
             // embedBox
             // 
             this.embedBox.AutoSize = true;
@@ -196,6 +197,7 @@
             this.advancedBox.Controls.Add(this.upAxis);
             this.advancedBox.Controls.Add(this.scaleFactor);
             this.advancedBox.Controls.Add(this.scaleLabel);
+            this.advancedBox.Controls.Add(this.doGiveUniqueAssetNames);
             this.advancedBox.Location = new System.Drawing.Point(12, 303);
             this.advancedBox.Name = "advancedBox";
             this.advancedBox.Size = new System.Drawing.Size(360, 80);
@@ -249,7 +251,18 @@
             this.scaleLabel.Size = new System.Drawing.Size(70, 13);
             this.scaleLabel.TabIndex = 0;
             this.scaleLabel.Text = "Scale Factor:";
-            // 
+            //
+            // doGiveUniqueAssetNames
+            //
+            this.doGiveUniqueAssetNames.AutoSize = true;
+            this.doGiveUniqueAssetNames.Location = new System.Drawing.Point(6, 65);
+            this.doGiveUniqueAssetNames.Name = "doGiveUniqueAssetNames";
+            this.doGiveUniqueAssetNames.Size = new System.Drawing.Size(205, 17);
+            this.doGiveUniqueAssetNames.TabIndex = 4;
+            this.doGiveUniqueAssetNames.Text = "Give unique asset file names";
+            this.doGiveUniqueAssetNames.UseVisualStyleBackColor = true;
+            this.doGiveUniqueAssetNames.CheckedChanged += new System.EventHandler(this.exportOpnions_CheckedChanged);
+            //
             // fbxOKbutton
             // 
             this.fbxOKbutton.Location = new System.Drawing.Point(216, 389);
@@ -340,5 +353,6 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.CheckBox showExpOpt;
         private System.Windows.Forms.CheckBox convertDummies;
+        private System.Windows.Forms.CheckBox doGiveUniqueAssetNames;
     }
 }
