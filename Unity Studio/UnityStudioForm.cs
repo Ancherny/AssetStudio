@@ -10,6 +10,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
+using JetBrains.Annotations;
+
 
 // TODO For extracting bundles, first check if file exists then decompress
 // TODO Font index error in Dreamfall Chapters
@@ -1402,131 +1404,152 @@ namespace UnityStudio
             }
         }
 
+        private void ExportAsset(
+            [NotNull] string exportpath,
+            [NotNull] AssetPreloadData asset,
+            ref int toExport,
+            ref int exportedCount)
+        {
+            toExport++;
+
+            //AudioClip and Texture2D extensions are set when the list is built
+            //so their overwrite tests can be done without loading them again
+
+            string exportFile = exportpath + asset.Text + asset.extension;
+
+            switch (asset.Type2)
+            {
+                case 28:
+                    if (ExportFileExists(exportFile, asset.TypeString))
+                    {
+                        break;
+                    }
+
+                    ExportTexture(new Texture2D(asset, true), exportFile);
+                    exportedCount++;
+                    break;
+
+                case 83:
+                    if (!ExportFileExists(exportFile, asset.TypeString))
+                    {
+                        ExportAudioClip(new AudioClip(asset, true), exportFile);
+                        exportedCount++;
+                    }
+                    break;
+
+                case 48:
+                    exportFile = exportpath + asset.Text + ".txt";
+                    if (!ExportFileExists(exportFile, asset.TypeString))
+                    {
+                        ExportText(new TextAsset(asset, true), exportFile);
+                        exportedCount++;
+                    }
+                    break;
+
+                case 49:
+                    TextAsset m_TextAsset = new TextAsset(asset, true);
+                    if (!ExportFileExists(exportFile, asset.TypeString))
+                    {
+                        ExportText(m_TextAsset, exportFile);
+                        exportedCount++;
+                    }
+                    break;
+
+                case 128:
+                    unityFont m_Font = new unityFont(asset, true);
+                    if (!ExportFileExists(exportFile, asset.TypeString))
+                    {
+                        ExportFont(m_Font, exportFile);
+                        exportedCount++;
+                    }
+                    break;
+            }
+        }
+
         private void ExportAssets_Click(object sender, EventArgs e)
         {
-            if (exportableAssets.Count > 0 && saveFolderDialog1.ShowDialog() == DialogResult.OK)
-            {
-                string savePath = saveFolderDialog1.FileName;
-                if (Path.GetFileName(savePath) == "Select folder or write folder name to create")
-                {
-                    savePath = Path.GetDirectoryName(saveFolderDialog1.FileName);
-                }
-
-                bool exportAll = ((ToolStripItem) sender).Name == "exportAllAssetsMenuItem";
-                bool exportFiltered = ((ToolStripItem) sender).Name == "exportFilteredAssetsMenuItem";
-                bool exportSelected = ((ToolStripItem) sender).Name == "exportSelectedAssetsMenuItem";
-
-                int toExport = 0;
-                int exportedCount = 0;
-
-                //looping assetsFiles will optimize HDD access
-                //but will also have a small performance impact when exporting only a couple of selected assets
-                foreach (AssetsFile assetsFile in assetsfileList)
-                {
-                    string exportpath = savePath + "\\";
-                    if (assetGroupOptions.SelectedIndex == 1)
-                    {
-                        exportpath += Path.GetFileNameWithoutExtension(assetsFile.filePath) + "_export\\";
-                    }
-
-                    foreach (AssetPreloadData asset in assetsFile.exportableAssets)
-                    {
-                        if (exportAll ||
-                            visibleAssets.Exists(x => x.uniqueID == asset.uniqueID) && (exportFiltered ||
-                                                                                        exportSelected &&
-                                                                                        asset.Index >= 0 &&
-                                                                                        assetListView.SelectedIndices
-                                                                                            .Contains(asset.Index)))
-                        {
-                            toExport++;
-                            if (assetGroupOptions.SelectedIndex == 0)
-                            {
-                                exportpath = savePath + "\\" + asset.TypeString + "\\";
-                            }
-
-                            //AudioClip and Texture2D extensions are set when the list is built
-                            //so their overwrite tests can be done without loading them again
-
-                            string exportFile = exportpath + asset.Text + asset.extension;
-
-                            switch (asset.Type2)
-                            {
-                                case 28:
-                                    if (ExportFileExists(exportFile, asset.TypeString))
-                                    {
-                                        break;
-                                    }
-
-                                    ExportTexture(new Texture2D(asset, true), exportFile);
-                                    exportedCount++;
-                                    break;
-
-                                case 83:
-                                    if (!ExportFileExists(exportFile, asset.TypeString))
-                                    {
-                                        ExportAudioClip(new AudioClip(asset, true), exportFile);
-                                        exportedCount++;
-                                    }
-                                    break;
-                                case 48:
-                                    exportFile = exportpath + asset.Text + ".txt";
-                                    if (!ExportFileExists(exportFile, asset.TypeString))
-                                    {
-                                        ExportText(new TextAsset(asset, true), exportFile);
-                                        exportedCount++;
-                                    }
-                                    break;
-                                case 49:
-                                    TextAsset m_TextAsset = new TextAsset(asset, true);
-                                    if (!ExportFileExists(exportFile, asset.TypeString))
-                                    {
-                                        ExportText(m_TextAsset, exportFile);
-                                        exportedCount++;
-                                    }
-                                    break;
-                                case 128:
-                                    unityFont m_Font = new unityFont(asset, true);
-                                    if (!ExportFileExists(exportFile, asset.TypeString))
-                                    {
-                                        ExportFont(m_Font, exportFile);
-                                        exportedCount++;
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-                }
-
-                string statusText;
-                switch (exportedCount)
-                {
-                    case 0:
-                        statusText = "Nothing exported.";
-                        break;
-                    case 1:
-                        statusText = toolStripStatusLabel1.Text + " finished.";
-                        break;
-                    default:
-                        statusText = "Finished exporting " + exportedCount + " assets.";
-                        break;
-                }
-
-                if (toExport > exportedCount)
-                {
-                    statusText += " " + (toExport - exportedCount) +
-                                  " assets skipped (not extractable or files already exist)";
-                }
-
-                StatusStripUpdate(statusText);
-
-                if (openAfterExport.Checked && exportedCount > 0)
-                {
-                    System.Diagnostics.Process.Start(savePath);
-                }
-            }
-            else
+            if (exportableAssets.Count <= 0 || saveFolderDialog1.ShowDialog() != DialogResult.OK)
             {
                 StatusStripUpdate("No exportable assets loaded");
+                return;
+            }
+
+            string savePath = saveFolderDialog1.FileName;
+            if (Path.GetFileName(savePath) == "Select folder or write folder name to create")
+            {
+                savePath = Path.GetDirectoryName(saveFolderDialog1.FileName);
+            }
+            if (string.IsNullOrEmpty(savePath))
+            {
+                throw new NotImplementedException();
+            }
+            string exportpath = savePath + "\\";
+
+            HashSet<int> selectedAssetIds = new HashSet<int>();
+
+            bool exportFiltered = ((ToolStripItem) sender).Name == "exportFilteredAssetsMenuItem";
+            bool exportSelected = ((ToolStripItem) sender).Name == "exportSelectedAssetsMenuItem";
+            if (exportFiltered || exportSelected)
+            {
+                foreach (int index in assetListView.SelectedIndices)
+                {
+                    if (index >= 0 && index < visibleAssets.Count)
+                    {
+                        selectedAssetIds.Add(visibleAssets[index].Index);
+                    }
+                }
+            }
+
+            int toExport = 0;
+            int exportedCount = 0;
+
+            //looping assetsFiles will optimize HDD access
+            //but will also have a small performance impact when exporting only a couple of selected assets
+            foreach (AssetsFile assetsFile in assetsfileList)
+            {
+                if (assetGroupOptions.SelectedIndex == 1)
+                {
+                    exportpath += Path.GetFileNameWithoutExtension(assetsFile.filePath) + "_export\\";
+                }
+
+                foreach (AssetPreloadData asset in assetsFile.exportableAssets)
+                {
+                    if (selectedAssetIds.Count > 0 && !selectedAssetIds.Contains(asset.Index))
+                        continue;
+
+                    if (assetGroupOptions.SelectedIndex == 0)
+                    {
+                        exportpath = savePath + "\\" + asset.TypeString + "\\";
+                    }
+                    ExportAsset(exportpath, asset, toExport:ref toExport, exportedCount:ref exportedCount);
+                }
+            }
+
+            string statusText;
+            switch (exportedCount)
+            {
+                case 0:
+                    statusText = "Nothing exported.";
+                    break;
+                case 1:
+                    statusText = toolStripStatusLabel1.Text + " finished.";
+                    break;
+                default:
+                    statusText = "Finished exporting " + exportedCount + " assets.";
+                    break;
+            }
+
+            if (toExport > exportedCount)
+            {
+                statusText += " " + (toExport - exportedCount) +
+                              " assets skipped (not extractable or files already exist)";
+            }
+
+            StatusStripUpdate(statusText);
+
+            if (openAfterExport.Checked && exportedCount > 0)
+            {
+                System.Diagnostics.Process.Start(savePath);
             }
         }
 
