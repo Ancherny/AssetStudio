@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="E:\f1\ResharperCache\_AssetStudio.-1262342184.00" t="ExcludeRecursive" />
-    <e p="E:\M1\UnityStudio" t="IncludeFlat">
+    <e p="E:\M1\AssetStudio" t="IncludeFlat">
       <e p="AssetStudio" t="IncludeRecursive">
         <e p="7z.dll" t="Include" />
         <e p="7zip" t="Include">
