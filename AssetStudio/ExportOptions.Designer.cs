@@ -1,4 +1,4 @@
-﻿namespace UnityStudio
+﻿namespace AssetStudio
 {
     partial class ExportOptions
     {

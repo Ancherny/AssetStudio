@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     class AudioClip
     {
@@ -10,7 +10,7 @@ namespace UnityStudio
         public bool m_3D;
         public bool m_UseHardware;
 
-        //Unity 5
+        //V 5
         public int m_LoadType;
         public int m_Channels;
         public int m_Frequency;

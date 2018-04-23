@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     public class PlayerSettings
     {
@@ -39,7 +39,7 @@ namespace UnityStudio
                 else if (sourceFile.version[0] == 3 && sourceFile.version[1] <= 4) { }
                 else { int accelerometerFrequency = a_Stream.ReadInt32(); }//3.5.0 and up
             }
-            //fail in Unity 5 beta
+            //fail in v 5 beta
             companyName = a_Stream.ReadAlignedString(a_Stream.ReadInt32());
             productName = a_Stream.ReadAlignedString(a_Stream.ReadInt32());
         }

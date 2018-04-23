@@ -1,11 +1,11 @@
 ﻿
-namespace UnityStudio
+namespace AssetStudio
 {
     class Renderer
     {
         public PPtr m_GameObject;
         public bool m_Enabled;
-        public byte m_CastShadows; //bool prior to Unity 5
+        public byte m_CastShadows; //bool prior to v 5
         public bool m_ReceiveShadows;
         public ushort m_LightmapIndex;
         public ushort m_LightmapIndexDynamic;

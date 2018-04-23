@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace UnityStudio
+namespace AssetStudio
 {
-    public partial class UnityStudioForm
+    public partial class AssetStudioForm
     {
         private void WriteFBX(string FBXfile, bool allNodes)
         {
@@ -374,7 +374,7 @@ namespace UnityStudio
                 fbx.Append("\n\t\tMinute: " + timestamp.Minute);
                 fbx.Append("\n\t\tSecond: " + timestamp.Second);
                 fbx.Append("\n\t\tMillisecond: " + timestamp.Millisecond);
-                fbx.Append("\n\t}\n\tCreator: \"Unity Studio by Chipicao\"\n}\n");
+                fbx.Append("\n\t}\n\tCreator: \"Asset Studio by Chipicao\"\n}\n");
 
                 fbx.Append("\nGlobalSettings:  {");
                 fbx.Append("\n\tVersion: 1000");

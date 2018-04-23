@@ -2,7 +2,7 @@
 using System.Text;
 using System.IO;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     public enum EndianType
     {

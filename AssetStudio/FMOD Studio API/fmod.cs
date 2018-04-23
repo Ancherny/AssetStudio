@@ -424,7 +424,7 @@ namespace FMOD
         ---------------------<br>
         This mode is for a 1 speaker arrangement.<br>
         Panning does not work in this speaker mode.<br>
-        Mono, stereo and multichannel sounds have each sound channel played on the one speaker unity.<br>
+        Mono, stereo and multichannel sounds have each sound channel played on the one speaker.<br>
         Mix behavior for multichannel sounds can be set with Channel::setPanMatrix.<br>
         Channel::setPanLevels does not work.<br>
         <br>
@@ -434,7 +434,7 @@ namespace FMOD
         <li>Mono sounds default to an even distribution between left and right.  They can be panned with Channel::setPan.<br>
         <li>Stereo sounds default to the middle, or full left in the left speaker and full right in the right speaker.
         <li>They can be cross faded with Channel::setPan.<br>
-        <li>Multichannel sounds have each sound channel played on each speaker at unity.<br>
+        <li>Multichannel sounds have each sound channel played on each speaker.<br>
         <li>Mix behavior for multichannel sounds can be set with Channel::setPanMatrix.<br>
         <li>Channel::setPanLevels works but only front left and right parameters are used, the rest are ignored.<br>
         <br>

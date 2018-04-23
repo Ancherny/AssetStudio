@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     internal class TexEnv
     {

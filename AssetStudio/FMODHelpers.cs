@@ -4,9 +4,9 @@ using FMOD;
 
 // TODO Double-check channelgroup argument in new FMOD Studio API system.playSound method
 
-namespace UnityStudio
+namespace AssetStudio
 {
-    public partial class UnityStudioForm
+    public partial class AssetStudioForm
     {
         private FMOD.System system;
         private Sound sound;

@@ -8,8 +8,8 @@
     <ProjectGuid>{24551E2D-E9B6-4CD6-8F2A-D9F4A13E7853}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UnityStudio</RootNamespace>
-    <AssemblyName>Unity Studio</AssemblyName>
+    <RootNamespace>AssetStudio</RootNamespace>
+    <AssemblyName>AssetStudio</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -50,7 +50,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Resources\unity.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\asset.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -131,8 +131,8 @@
     <Compile Include="FMODHelpers.cs" />
     <Compile Include="FormHelpers.cs" />
     <Compile Include="PPtrHelpers.cs" />
-    <Compile Include="Unity Classes\AudioClip.cs" />
-    <Compile Include="Unity Classes\BuildSettings.cs" />
+    <Compile Include="Classes\AudioClip.cs" />
+    <Compile Include="Classes\BuildSettings.cs" />
     <Compile Include="BundleFile.cs" />
     <Compile Include="ClassIDReference.cs" />
     <Compile Include="EndianStream.cs" />
@@ -145,31 +145,31 @@
     <Compile Include="FMOD Studio API\fmod.cs" />
     <Compile Include="FMOD Studio API\fmod_dsp.cs" />
     <Compile Include="FMOD Studio API\fmod_errors.cs" />
-    <Compile Include="Unity Classes\Font.cs" />
+    <Compile Include="Classes\Font.cs" />
     <Compile Include="GOHierarchy.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Lz4DecoderStream.cs" />
-    <Compile Include="Unity Classes\Material.cs" />
-    <Compile Include="Unity Classes\Mesh.cs" />
-    <Compile Include="Unity Classes\GameObject.cs" />
+    <Compile Include="Classes\Material.cs" />
+    <Compile Include="Classes\Mesh.cs" />
+    <Compile Include="Classes\GameObject.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="Unity Classes\PlayerSettings.cs" />
-    <Compile Include="Unity Classes\RectTransform.cs" />
-    <Compile Include="Unity Classes\Renderer.cs" />
-    <Compile Include="Unity Classes\SkinnedMeshRenderer.cs" />
-    <Compile Include="Unity Classes\MeshFilter.cs" />
-    <Compile Include="Unity Classes\TextAsset.cs" />
-    <Compile Include="Unity Classes\Texture2D.cs" />
-    <Compile Include="Unity Classes\Transform.cs" />
+    <Compile Include="Classes\PlayerSettings.cs" />
+    <Compile Include="Classes\RectTransform.cs" />
+    <Compile Include="Classes\Renderer.cs" />
+    <Compile Include="Classes\SkinnedMeshRenderer.cs" />
+    <Compile Include="Classes\MeshFilter.cs" />
+    <Compile Include="Classes\TextAsset.cs" />
+    <Compile Include="Classes\Texture2D.cs" />
+    <Compile Include="Classes\Transform.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AssetsFile.cs" />
-    <Compile Include="UnityStudioForm.cs">
+    <Compile Include="AssetStudioForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UnityStudioForm.Designer.cs">
-      <DependentUpon>UnityStudioForm.cs</DependentUpon>
+    <Compile Include="AssetStudioForm.Designer.cs">
+      <DependentUpon>AssetStudioForm.cs</DependentUpon>
     </Compile>
     <Content Include="7z.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -191,8 +191,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UnityStudioForm.resx">
-      <DependentUpon>UnityStudioForm.cs</DependentUpon>
+    <EmbeddedResource Include="AssetStudioForm.resx">
+      <DependentUpon>AssetStudioForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
@@ -228,7 +228,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\unity.ico" />
+    <Content Include="Resources\asset.ico" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

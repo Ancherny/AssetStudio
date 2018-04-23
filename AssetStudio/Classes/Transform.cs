@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     public class Transform
     {

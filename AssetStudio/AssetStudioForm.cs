@@ -14,12 +14,12 @@ using System.Windows.Forms;
 // TODO For extracting bundles, first check if file exists then decompress
 // TODO Font index error in Dreamfall Chapters
 
-namespace UnityStudio
+namespace AssetStudio
 {
-    public partial class UnityStudioForm : Form
+    public partial class AssetStudioForm : Form
     {
         //files to load
-        private List<string> unityFiles = new List<string>();
+        private List<string> assetFiles = new List<string>();
 
         //loaded files
         private static readonly List<AssetsFile> assetsfileList = new List<AssetsFile>();
@@ -87,15 +87,15 @@ namespace UnityStudio
                 {
                     MergeSplitAssets(mainPath);
 
-                    unityFiles.AddRange(openFileDialog1.FileNames);
+                    assetFiles.AddRange(openFileDialog1.FileNames);
                     progressBar1.Value = 0;
-                    progressBar1.Maximum = unityFiles.Count;
+                    progressBar1.Maximum = assetFiles.Count;
 
                     //use a for loop because list size can change
-                    foreach (string unityFile in unityFiles)
+                    foreach (string assetFile in assetFiles)
                     {
-                        StatusStripUpdate("Loading " + Path.GetFileName(unityFile));
-                        LoadAssetsFile(unityFile);
+                        StatusStripUpdate("Loading " + Path.GetFileName(assetFile));
+                        LoadAssetsFile(assetFile);
                     }
                 }
                 else
@@ -168,28 +168,28 @@ namespace UnityStudio
 
                             return 0;
                         });
-                        unityFiles.AddRange(sortedList);
+                        assetFiles.AddRange(sortedList);
                     }
 
                     #endregion
 
                     else
                     {
-                        unityFiles.AddRange(fileNames);
+                        assetFiles.AddRange(fileNames);
                     }
                 }
 
-                unityFiles = unityFiles.Distinct().ToList();
+                assetFiles = assetFiles.Distinct().ToList();
                 progressBar1.Value = 0;
-                progressBar1.Maximum = unityFiles.Count;
+                progressBar1.Maximum = assetFiles.Count;
 
                 // ReSharper disable once ForCanBeConvertedToForeach
                 // use a for loop because list size can change
-                for (int fileId = 0; fileId < unityFiles.Count; fileId++)
+                for (int fileId = 0; fileId < assetFiles.Count; fileId++)
                 {
-                    string unityFile = unityFiles[fileId];
-                    StatusStripUpdate("Loading " + Path.GetFileName(unityFile));
-                    LoadAssetsFile(unityFile);
+                    string assetFile = assetFiles[fileId];
+                    StatusStripUpdate("Loading " + Path.GetFileName(assetFile));
+                    LoadAssetsFile(assetFile);
                 }
 
                 progressBar1.Value = 0;
@@ -266,15 +266,15 @@ namespace UnityStudio
 
                 progressBar1.PerformStep();
 
-                foreach (AssetsFile.UnityShared sharedFile in assetsFile.sharedAssetsList)
+                foreach (AssetsFile.AssetShared sharedFile in assetsFile.sharedAssetsList)
                 {
                     string sharedFilePath = Path.GetDirectoryName(fileName) + "\\" + sharedFile.fileName;
                     string sharedFileName = Path.GetFileName(sharedFile.fileName);
                     if (string.IsNullOrEmpty(sharedFileName))
                         continue;
 
-                    //searching in unityFiles would preserve desired order, but...
-                    string quedSharedFile = unityFiles.Find(uFile =>
+                    //searching in assetFiles would preserve desired order, but...
+                    string quedSharedFile = assetFiles.Find(uFile =>
                         string.Equals(Path.GetFileName(uFile), sharedFileName, StringComparison.OrdinalIgnoreCase));
                     if (quedSharedFile == null)
                     {
@@ -294,14 +294,14 @@ namespace UnityStudio
                         if (File.Exists(sharedFilePath))
                         {
                             //this would get screwed if the file somehow fails to load
-                            sharedFile.Index = unityFiles.Count;
-                            unityFiles.Add(sharedFilePath);
+                            sharedFile.Index = assetFiles.Count;
+                            assetFiles.Add(sharedFilePath);
                             progressBar1.Maximum++;
                         }
                     }
                     else
                     {
-                        sharedFile.Index = unityFiles.IndexOf(quedSharedFile);
+                        sharedFile.Index = assetFiles.IndexOf(quedSharedFile);
                     }
                 }
             }
@@ -315,7 +315,7 @@ namespace UnityStudio
 
             List<AssetsFile> b_assetsfileList = new List<AssetsFile>();
 
-            foreach (BundleFile.MemoryAssetsFile memFile in b_File.MemoryAssetsFileList) //filter unity files
+            foreach (BundleFile.MemoryAssetsFile memFile in b_File.MemoryAssetsFileList) //filter files
             {
                 bool validAssetsFile = false;
                 switch (Path.GetExtension(memFile.fileName))
@@ -373,7 +373,7 @@ namespace UnityStudio
 
             foreach (AssetsFile assetsFile in b_assetsfileList)
             {
-                foreach (AssetsFile.UnityShared sharedFile in assetsFile.sharedAssetsList)
+                foreach (AssetsFile.AssetShared sharedFile in assetsFile.sharedAssetsList)
                 {
                     sharedFile.fileName = Path.GetDirectoryName(bundleFileName) + "\\" + sharedFile.fileName;
                     AssetsFile loadedSharedFile = b_assetsfileList.Find(aFile => aFile.filePath == sharedFile.fileName);
@@ -389,7 +389,7 @@ namespace UnityStudio
         {
             OpenFileDialog openBundleDialog = new OpenFileDialog
             {
-                Filter = "Unity bundle files|*.unity3d; *.unity3d.lz4; *.assetbundle; *.bundle; *.bytes|" +
+                Filter = "Asset bundle files|*.unity3d; *.unity3d.lz4; *.assetbundle; *.bundle; *.bytes|" +
                          "All files (use at your own risk!)|*.*",
                 FilterIndex = 1,
                 RestoreDirectory = true,
@@ -417,7 +417,7 @@ namespace UnityStudio
                     startPath = Path.GetDirectoryName(startPath);
                 }
 
-                string[] unityFileTypes =
+                string[] assetFileTypes =
                 {
                     "*.unity3d",
                     "*.unity3d.lz4",
@@ -427,7 +427,7 @@ namespace UnityStudio
                     "*.bytes"
                 };
 
-                foreach (string fileType in unityFileTypes)
+                foreach (string fileType in assetFileTypes)
                 {
                     // ReSharper disable once AssignNullToNotNullAttribute
                     string[] fileNames = Directory.GetFiles(startPath, fileType, SearchOption.AllDirectories);
@@ -479,7 +479,7 @@ namespace UnityStudio
             return extractedCount;
         }
 
-        private void UnityStudioForm_KeyDown(object sender, KeyEventArgs e)
+        private void AssetStudioForm_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.Alt && e.KeyCode == Keys.D)
             {
@@ -733,7 +733,7 @@ namespace UnityStudio
                             //case 89: //CubeMap
                             case 128: //Font
                             {
-                                unityFont unused = new unityFont(asset, false);
+                                AssetFont unused = new AssetFont(asset, false);
                                 assetsFile.exportableAssets.Add(asset);
                                 break;
                             }
@@ -741,7 +741,7 @@ namespace UnityStudio
                             {
                                 PlayerSettings plSet = new PlayerSettings(asset);
                                 productName = plSet.productName;
-                                Text = "Unity Studio - " + productName + " - " +
+                                Text = "Asset Studio - " + productName + " - " +
                                        assetsFile.m_Version + " - " + assetsFile.platformStr;
                                 break;
                             }
@@ -755,9 +755,9 @@ namespace UnityStudio
                     exportableAssets.AddRange(assetsFile.exportableAssets);
                 }
 
-                if (Text == "Unity Studio" && assetsfileList.Count > 0)
+                if (Text == "Asset Studio" && assetsfileList.Count > 0)
                 {
-                    Text = "Unity Studio - no productName - " +
+                    Text = "Asset Studio - no productName - " +
                            assetsfileList[0].m_Version + " - " + assetsfileList[0].platformStr;
                 }
 
@@ -1295,7 +1295,7 @@ namespace UnityStudio
 
                 case 128: //Font
                 {
-                    unityFont m_Font = new unityFont(asset, true);
+                    AssetFont m_Font = new AssetFont(asset, true);
 
                     if (asset.extension != ".otf" && m_Font.m_FontData != null)
                     {
@@ -1481,7 +1481,7 @@ namespace UnityStudio
                                     }
                                     break;
                                 case 128:
-                                    unityFont m_Font = new unityFont(asset, true);
+                                    AssetFont m_Font = new AssetFont(asset, true);
                                     if (!ExportFileExists(exportpath + asset.Text + asset.extension, asset.TypeString))
                                     {
                                         ExportFont(m_Font, exportpath + asset.Text + asset.extension);
@@ -1546,7 +1546,7 @@ namespace UnityStudio
             statusStrip1.Update();
         }
 
-        public UnityStudioForm()
+        public AssetStudioForm()
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             InitializeComponent();
@@ -1560,9 +1560,9 @@ namespace UnityStudio
 
         private void resetForm()
         {
-            Text = "Unity Studio";
+            Text = "Asset Studio";
 
-            unityFiles.Clear();
+            assetFiles.Clear();
             assetsfileList.Clear();
             exportableAssets.Clear();
             visibleAssets.Clear();
@@ -1591,7 +1591,7 @@ namespace UnityStudio
             FMODreset();
         }
 
-        private void UnityStudioForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void AssetStudioForm_FormClosing(object sender, FormClosingEventArgs e)
         {
         }
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     public class AssetsFile
     {
@@ -23,19 +23,19 @@ namespace UnityStudio
         public readonly Dictionary<long, Transform> TransformList = new Dictionary<long, Transform>();
 
         public readonly List<AssetPreloadData> exportableAssets = new List<AssetPreloadData>();
-        public readonly List<UnityShared> sharedAssetsList = new List<UnityShared>
+        public readonly List<AssetShared> sharedAssetsList = new List<AssetShared>
         {
-            new UnityShared()
+            new AssetShared()
         };
 
-        private readonly ClassIDReference UnityClassID = new ClassIDReference();
+        private readonly ClassIDReference AssetClassID = new ClassIDReference();
 
         public readonly SortedDictionary<int, ClassStrStruct> ClassStructures =
             new SortedDictionary<int, ClassStrStruct>();
 
         private readonly bool baseDefinitions = false;
 
-        public class UnityShared
+        public class AssetShared
         {
             public int Index = -1; //actual index in main list
             // ReSharper disable once NotAccessedField.Global
@@ -97,7 +97,7 @@ namespace UnityStudio
                 }
                 default:
                 {
-                    //MessageBox.Show("Unsupported Unity version!", "Unity Studio Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //MessageBox.Show("Unsupported Asset version!", "Asset Studio Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
@@ -225,9 +225,9 @@ namespace UnityStudio
                     a_Stream.ReadByte();
                 }
 
-                if (UnityClassID.Names[asset.Type2] != null)
+                if (AssetClassID.Names[asset.Type2] != null)
                 {
-                    asset.TypeString = UnityClassID.Names[asset.Type2];
+                    asset.TypeString = AssetClassID.Names[asset.Type2];
                 }
 
                 asset.uniqueID = i.ToString(assetIDfmt);
@@ -237,7 +237,7 @@ namespace UnityStudio
 
                 preloadTable.Add(asset.m_PathID, asset);
 
-                #region read BuildSettings to get version for unity 2.x files
+                #region read BuildSettings to get version for 2.x files
 
                 if (asset.Type2 == 141 && fileGen == 6)
                 {
@@ -280,7 +280,7 @@ namespace UnityStudio
             int sharedFileCount = a_Stream.ReadInt32();
             for (int i = 0; i < sharedFileCount; i++)
             {
-                UnityShared shared = new UnityShared
+                AssetShared shared = new AssetShared
                 {
                     aName = a_Stream.ReadStringToNull()
                 };

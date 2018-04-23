@@ -1,6 +1,6 @@
-﻿namespace UnityStudio
+﻿namespace AssetStudio
 {
-    partial class UnityStudioForm
+    partial class AssetStudioForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UnityStudioForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AssetStudioForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -100,7 +100,7 @@
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.saveFolderDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.treeTip = new System.Windows.Forms.ToolTip(this.components);
-            this.sceneTreeView = new UnityStudio.GOHierarchy();
+            this.sceneTreeView = new AssetStudio.GOHierarchy();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -774,8 +774,8 @@
             // 
             // openFileDialog1
             // 
-            this.openFileDialog1.Filter = "Unity asset files|level*; mainData; CustomAssetBundle-*; CAB-*; BuildPlayer-*; *." +
-    "assets; *.sharedAssets|Unity bundle files|*.unity3d; *.unity3d.lz4; *.assetbundl" +
+            this.openFileDialog1.Filter = "Asset files|level*; mainData; CustomAssetBundle-*; CAB-*; BuildPlayer-*; *." +
+    "assets; *.sharedAssets|Bundle files|*.unity3d; *.unity3d.lz4; *.assetbundl" +
     "e; *.bundle; *.bytes";
             this.openFileDialog1.Multiselect = true;
             this.openFileDialog1.RestoreDirectory = true;
@@ -813,7 +813,7 @@
             this.sceneTreeView.TabIndex = 1;
             this.sceneTreeView.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.sceneTreeView_AfterCheck);
             // 
-            // UnityStudioForm
+            // AssetStudioForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -824,10 +824,10 @@
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(620, 400);
-            this.Name = "UnityStudioForm";
-            this.Text = "Unity Studio";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.UnityStudioForm_FormClosing);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.UnityStudioForm_KeyDown);
+            this.Name = "AssetStudioForm";
+            this.Text = "Asset Studio";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AssetStudioForm_FormClosing);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.AssetStudioForm_KeyDown);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);

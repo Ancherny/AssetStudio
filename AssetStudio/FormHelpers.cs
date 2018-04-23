@@ -5,9 +5,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Tao.DevIl;
 
-namespace UnityStudio
+namespace AssetStudio
 {
-    public partial class UnityStudioForm
+    public partial class AssetStudioForm
     {
         [DllImport("gdi32.dll")]
         private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont, IntPtr pdv, [In] ref uint pcFonts);
@@ -212,7 +212,7 @@ namespace UnityStudio
             }
         }
 
-        private static void ExportFont(unityFont m_Font, string exportFilename)
+        private static void ExportFont(AssetFont m_Font, string exportFilename)
         {
             using (BinaryWriter writer = new BinaryWriter(File.Open(exportFilename, FileMode.Create)))
             {

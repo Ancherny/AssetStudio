@@ -20,9 +20,9 @@ using Tao.DevIl;
 //or at least connect to scene instead of missing node
 //For extractign bundles, first check if file exists then decompress
 
-namespace Unity_Studio
+namespace Asset_Studio
 {
-    public partial class UnityStudioForm : Form
+    public partial class AssetStudioForm : Form
     {
         private List<AssetsFile> assetsfileList = new List<AssetsFile>();
         private List<AssetPreloadData> exportableAssets = new List<AssetPreloadData>(); //used to hold all listItems while the list is being filtered
@@ -102,10 +102,10 @@ namespace Unity_Studio
             List<string> unityFiles = new List<string>();
             /*FolderBrowserDialog folderBrowserDialog1 = new FolderBrowserDialog();
 
-            folderBrowserDialog1.Description = "Load all Unity assets from folder and subfolders";
+            folderBrowserDialog1.Description = "Load all assets from folder and subfolders";
             folderBrowserDialog1.ShowNewFolderButton = false;
-            //folderBrowserDialog1.SelectedPath = "E:\\Assets\\Unity";
-            folderBrowserDialog1.SelectedPath = "E:\\Assets\\Unity\\WebPlayer\\Porsche\\92AAF1\\defaultGeometry";*/
+            //folderBrowserDialog1.SelectedPath = "E:\\Assets\\Assets";
+            folderBrowserDialog1.SelectedPath = "E:\\Assets\\Assets\\WebPlayer\\Porsche\\92AAF1\\defaultGeometry";*/
 
             if (openFolderDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -169,7 +169,7 @@ namespace Unity_Studio
             assetListView.Items.Clear();
             assetListView.Groups.Clear();
 
-            previewPanel.BackgroundImage = global::Unity_Studio.Properties.Resources.preview;
+            previewPanel.BackgroundImage = global::Asset_Studio.Properties.Resources.preview;
             previewPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             assetInfoLabel.Visible = false;
             assetInfoLabel.Text = null;
@@ -269,7 +269,7 @@ namespace Unity_Studio
             {
                 List<AssetsFile> b_assetsfileList = new List<AssetsFile>();
 
-                foreach (var memFile in b_File.MemoryAssetsFileList) //filter unity files
+                foreach (var memFile in b_File.MemoryAssetsFileList) //filter asset files
                 {
                     bool validAssetsFile = false;
                     switch (Path.GetExtension(memFile.fileName))
@@ -323,7 +323,7 @@ namespace Unity_Studio
         private void extractBundleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openBundleDialog = new OpenFileDialog();
-            openBundleDialog.Filter = "Unity bundle files|*.unity3d; *.assetbundle; *.bundle; *.bytes|All files (use at your own risk!)|*.*";
+            openBundleDialog.Filter = "Asset bundle files|*.unity3d; *.assetbundle; *.bundle; *.bytes|All files (use at your own risk!)|*.*";
             openBundleDialog.FilterIndex = 1;
             openBundleDialog.RestoreDirectory = true;
             openBundleDialog.Multiselect = true;
@@ -342,7 +342,7 @@ namespace Unity_Studio
             List<string> bundleFiles = new List<string>();
             FolderBrowserDialog folderBrowserDialog1 = new FolderBrowserDialog();
 
-            folderBrowserDialog1.Description = "Extract all Unity bundles from folder and subfolders";
+            folderBrowserDialog1.Description = "Extract all Asset bundles from folder and subfolders";
             folderBrowserDialog1.ShowNewFolderButton = false;
 
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
@@ -421,7 +421,7 @@ namespace Unity_Studio
                             }
                             else
                             {
-                                previewPanel.BackgroundImage = global::Unity_Studio.Properties.Resources.preview;
+                                previewPanel.BackgroundImage = global::Asset_Studio.Properties.Resources.preview;
                                 previewPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
                             }
                         }
@@ -934,7 +934,7 @@ namespace Unity_Studio
 
         private void selectAsset(object sender, ListViewItemSelectionChangedEventArgs e)
         {
-            previewPanel.BackgroundImage = global::Unity_Studio.Properties.Resources.preview;
+            previewPanel.BackgroundImage = global::Asset_Studio.Properties.Resources.preview;
             previewPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             assetInfoLabel.Visible = false;
             assetInfoLabel.Text = null;
@@ -1616,7 +1616,7 @@ namespace Unity_Studio
                 fbx.Append("\n\t\tMinute: " + timestamp.Minute);
                 fbx.Append("\n\t\tSecond: " + timestamp.Second);
                 fbx.Append("\n\t\tMillisecond: " + timestamp.Millisecond);
-                fbx.Append("\n\t}\n\tCreator: \"Unity Studio by Chipicao\"\n}\n");
+                fbx.Append("\n\t}\n\tCreator: \"Asset Studio by Chipicao\"\n}\n");
 
                 fbx.Append("\nGlobalSettings:  {");
                 fbx.Append("\n\tVersion: 1000");
@@ -2787,7 +2787,7 @@ namespace Unity_Studio
         }
 
 
-        public UnityStudioForm()
+        public AssetStudioForm()
         {
             InitializeComponent();
             uniqueNames.Checked = (bool)Properties.Settings.Default["uniqueNames"];
@@ -2798,7 +2798,7 @@ namespace Unity_Studio
             resizeNameColumn();
         }
 
-        private void UnityStudioForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void AssetStudioForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             /*Properties.Settings.Default["uniqueNames"] = uniqueNamesMenuItem.Checked;
             Properties.Settings.Default["enablePreview"] = enablePreviewMenuItem.Checked;

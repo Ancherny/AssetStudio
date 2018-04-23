@@ -13,7 +13,7 @@ Also, rotating the axes is just that, the same handedness in a different system.
 
 Y-up or Z-up are not requirements OR defining characteristics of a handedness, they are just common that way.
 
-Unity is left-handed with Y-up
+Asset is left-handed with Y-up
 Aircraft              View
 Y Top                          Y Up
 |                              |
@@ -66,36 +66,36 @@ PreRotation -90,0,0 to bring Original Up (FBX Z) to ViewCube Up when importing
 PreRotation means only the geometry is rotated locally around pivot before applying other modifiers. It is "invisible" to the user.
 
 
-Importing FBX in Unity, Axis settings and PreRotations are ignored.
-They probably ignore them because the order of vertex components is always the same in FBX, and Unity axes never change orientation (as opposed to Max-Maya).
+Importing FBX in Assets, Axis settings and PreRotations are ignored.
+They probably ignore them because the order of vertex components is always the same in FBX, and Asset axes never change orientation (as opposed to Max-Maya).
 Vertex components are loaded as follows:
-Unity Up(Y) = FBX Y
-Unity Front(Z) = FBX Z
-Unity Left(X) = FBX -X
+Asset Up(Y) = FBX Y
+Asset Front(Z) = FBX Z
+Asset Left(X) = FBX -X
 
 Technically, this is a correct handedness conversion, but to a different system, because the model is not properly oriented (plane nose is down).
-So Unity adds a -90 degree rotation, similar to the FBX PreRotation, to bring the nose to Front(Z).
+So Asset adds a -90 degree rotation, similar to the FBX PreRotation, to bring the nose to Front(Z).
 Except it does it as a regular rotation, and combines it with any other rotations in the Transform asset.
 
-Converting from Unity back to FBX, the same vertex conversion cannot be applied because we have to take into account the rotation.
+Converting from Asset back to FBX, the same vertex conversion cannot be applied because we have to take into account the rotation.
 Option 0: export vertices and transformations as -X,Y,Z and set FBX option to Y-up without PreRotation!
 the result will be Max Z = FBX Y, Max -Y = FBX Z, Max X = FBX X => final order -X -Z Y
 Option 1: export vertices and transformations as -X,-Z,Y and set FBX options as "Z-up".
-The -90 rotation exported from Unity will bring the model in correct orientation.
+The -90 rotation exported from Asset will bring the model in correct orientation.
 Option 2: export vertices and transformations as -X,-Y,-Z, add -90 PreRotation to every Mesh Node and set FBX options as "Y-up".
-The -90 rotation from Unity plus the -90 PreRotation will bring the model in correct orientation.
+The -90 rotation from Asset plus the -90 PreRotation will bring the model in correct orientation.
 Remember though that the PreRotation is baked into the Geometry.
 
-But since the -90 rotation from Unity is a regular type, it will show up in the modifier in both cases.
-Also, re-importing this FBX in Unity will now produce a (-90)+(-90)=-180 rotation.
+But since the -90 rotation from Asset is a regular type, it will show up in the modifier in both cases.
+Also, re-importing this FBX in Asset will now produce a (-90)+(-90)=-180 rotation.
 This is an unfortunate eyesore, but nothing more, the orientation will be fine.
 
-In theory, one could add +90 degrees rotation to GameObjects that link to Mesh assets (but not other types) to cancel out the Unity rotation.
-The problem is you can never know where the Unity mesh originated from. If it came from a left-handed format such as OBJ, there wouldn't have been any conversion and it wouldn't have that -90 degree adjustment.
+In theory, one could add +90 degrees rotation to GameObjects that link to Mesh assets (but not other types) to cancel out the Asset rotation.
+The problem is you can never know where the Asset mesh originated from. If it came from a left-handed format such as OBJ, there wouldn't have been any conversion and it wouldn't have that -90 degree adjustment.
 So it would "fix" meshes that were originally sourced form FBX, but would still have the "extra" rotation in mehses sourced from left-handed formats.
 */
 
-namespace UnityStudio
+namespace AssetStudio
 {
     public class Mesh
     {
@@ -572,7 +572,7 @@ namespace UnityStudio
 
                 BitArray m_CurrentChannels = new BitArray(new int[1] { a_Stream.ReadInt32() });
                 m_VertexCount = a_Stream.ReadInt32();
-                //int singleStreamStride = 0;//used tor unity 5
+                //int singleStreamStride = 0;//used tor v 5
                 int streamCount = 0;
 
                 #region streams for 3.5.0 - 3.5.7
@@ -608,7 +608,7 @@ namespace UnityStudio
                         m_Channels[c].format = a_Stream.ReadByte();
                         m_Channels[c].dimension = a_Stream.ReadByte();
 
-                        //calculate stride for Unity 5
+                        //calculate stride for v 5
                         //singleStreamStride += m_Channels[c].dimension * (4 / (int)Math.Pow(2, m_Channels[c].format));
 
                         if (m_Channels[c].stream >= streamCount) { streamCount = m_Channels[c].stream + 1; }
@@ -693,7 +693,7 @@ namespace UnityStudio
                                 //in the future, try to use only m_CurrentChannels
                                 if ((version[0] < 5 && m_Stream.channelMask.Get(b)) || (version[0] >= 5 && m_CurrentChannels.Get(b)))
                                 {
-                                    // in Unity 4.x the colors channel has 1 dimension, as in 1 color with 4 components
+                                    // in v 4.x the colors channel has 1 dimension, as in 1 color with 4 components
                                     if (b == 2 && m_Channel.format == 2) { m_Channel.dimension = 4; }
 
                                     componentByteSize = 4 / (int)Math.Pow(2, m_Channel.format);
@@ -758,7 +758,7 @@ namespace UnityStudio
                     foreach (StreamInfo m_Stream in m_Streams)
                     {
                         //a stream may have multiple vertex components but without channels there are no offsets, so I assume all vertex properties are in order
-                        //Unity 3.5.x only uses floats, and that's probably why channels were introduced in Unity 4
+                        //v 3.5.x only uses floats, and that's probably why channels were introduced in v 4
 
                         ChannelInfo m_Channel = new ChannelInfo();//create my own channel so I can use the same methods
                         m_Channel.offset = 0;

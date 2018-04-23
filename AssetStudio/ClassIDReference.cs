@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     public class ClassStrStruct : ListViewItem
     {

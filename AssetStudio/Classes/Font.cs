@@ -1,12 +1,12 @@
 ﻿
-namespace UnityStudio
+namespace AssetStudio
 {
-    class unityFont
+    class AssetFont
     {
         public string m_Name;
         public byte[] m_FontData;
 
-        public unityFont(AssetPreloadData preloadData, bool readSwitch)
+        public AssetFont(AssetPreloadData preloadData, bool readSwitch)
         {
             AssetsFile sourceFile = preloadData.sourceFile;
             EndianStream a_Stream = preloadData.sourceFile.a_Stream;

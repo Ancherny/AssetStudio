@@ -1,5 +1,5 @@
 ﻿
-namespace UnityStudio
+namespace AssetStudio
 {
     public class SkinnedMeshRenderer
     {
@@ -89,7 +89,7 @@ namespace UnityStudio
 
             if (version[0] == 2 && version[1] < 6)
             {
-                //this would be the only error if mainVersion is not read in time for a unity 2.x game
+                //this would be the only error if mainVersion is not read in time for a v 2.x game
                 PPtr m_DisableAnimationWhenOffscreen = sourceFile.ReadPPtr();
             }
 

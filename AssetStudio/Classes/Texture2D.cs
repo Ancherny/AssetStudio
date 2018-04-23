@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     internal class Texture2D
     {

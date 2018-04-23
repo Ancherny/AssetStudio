@@ -1,4 +1,4 @@
-﻿namespace Unity_Studio
+﻿namespace Asset_Studio
 {
     partial class AboutBox1
     {

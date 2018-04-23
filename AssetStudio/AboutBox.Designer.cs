@@ -1,4 +1,4 @@
-﻿namespace UnityStudio
+﻿namespace AssetStudio
 {
     partial class AboutBox
     {
@@ -165,7 +165,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Unity Studio";
+            this.Text = "Asset Studio";
             this.TopMost = true;
             this.tableLayoutPanel.ResumeLayout(false);
             this.tableLayoutPanel.PerformLayout();

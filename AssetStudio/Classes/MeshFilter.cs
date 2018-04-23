@@ -1,5 +1,5 @@
 ﻿
-namespace UnityStudio
+namespace AssetStudio
 {
     public class MeshFilter
     {

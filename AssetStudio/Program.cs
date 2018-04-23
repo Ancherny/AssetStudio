@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     internal static class Program
     {
@@ -13,7 +13,7 @@ namespace UnityStudio
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new UnityStudioForm());
+            Application.Run(new AssetStudioForm());
         }
     }
 }

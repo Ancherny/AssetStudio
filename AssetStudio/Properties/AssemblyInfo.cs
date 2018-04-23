@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Unity Studio")]
-[assembly: AssemblyDescription("- Compatible with all Unity versions from 2.5.0 to 5.2.2\r\n- Compatible with Web, PC, iOS, Android, PS3, Xbox 360, OSX and Linux games/apps\r\n- Automatically merges .split\r\n- 3D objets exported to FBX\r\n- Able to load audio streams from .resS files\r\n- Real-time preview window and export function for textures, audio clips, shaders and fonts\r\n  - Textures: DDS (Alpha8bpp, ARGB16bpp, RGB24bpp, ARGB32bpp, BGRA32bpp, RGB565, DXT1, DXT5, RGBA16bpp)\r\n              PVR (PVRTC_RGB2, PVRTC_RGBA2, PVRTC_RGBA4, PVRTC_RGB4, ETC_RGB4)\r\n  - Audio clips: mp3, ogg, wav, xbox wav\r\n  - Shader files are exported in plain-text\r\n  - Fonts: ttf, otf")]
+[assembly: AssemblyTitle("Asset Studio")]
+[assembly: AssemblyDescription("- Compatible with all Asset versions from 2.5.0 to 5.2.2\r\n- Compatible with Web, PC, iOS, Android, PS3, Xbox 360, OSX and Linux games/apps\r\n- Automatically merges .split\r\n- 3D objets exported to FBX\r\n- Able to load audio streams from .resS files\r\n- Real-time preview window and export function for textures, audio clips, shaders and fonts\r\n  - Textures: DDS (Alpha8bpp, ARGB16bpp, RGB24bpp, ARGB32bpp, BGRA32bpp, RGB565, DXT1, DXT5, RGBA16bpp)\r\n              PVR (PVRTC_RGB2, PVRTC_RGBA2, PVRTC_RGBA4, PVRTC_RGB4, ETC_RGB4)\r\n  - Audio clips: mp3, ogg, wav, xbox wav\r\n  - Shader files are exported in plain-text\r\n  - Fonts: ttf, otf")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Unity Studio")]
+[assembly: AssemblyProduct("Asset Studio")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

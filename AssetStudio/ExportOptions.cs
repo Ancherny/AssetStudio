@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     public partial class ExportOptions : Form
     {

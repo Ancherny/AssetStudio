@@ -2,7 +2,7 @@
 using System.IO;
 using Lz4;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     public class BundleFile
     {

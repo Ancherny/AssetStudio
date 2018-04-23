@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace UnityStudio
+namespace AssetStudio
 {
     internal partial class AboutBox : Form
     {
